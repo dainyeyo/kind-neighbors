@@ -15,21 +15,31 @@ MonoBehaviour:
   speakerName: "\uBE75\uC9D1 \uC8FC\uC778"
   entries:
   - conditions:
+    - key: delivered.Order_D1_Letter
+      comparison: 0
+      value: 1
+    startNodeId: done
+  - conditions:
+    - key: accepted.Order_D1_Letter
+      comparison: 0
+      value: 1
+    startNodeId: letter_receive
+  - conditions:
     - key: delivered.Order_D1_Bread
       comparison: 0
       value: 1
-    startNodeId: after
+    startNodeId: after_bread
   - conditions:
     - key: accepted.Order_D1_Bread
       comparison: 0
       value: 1
-    startNodeId: remind
+    startNodeId: remind_bread
   - conditions: []
     startNodeId: greet
   nodes:
   - id: greet
     speaker: 
-    text: "\uC5B4\uBA38, \uC0C8\uB85C \uC628 \uBC30\uB2EC\uC6D0\uC774\uAD6C\uB098!
+    text: "\uC5B4\uBA38, \uB124\uAC00 \uC0C8\uB85C \uC628 \uBC30\uB2EC\uC6D0 {player}\uAD6C\uB098!
       \uB9C8\uCE68 \uC798 \uC654\uC5B4~"
     nextId: ask
     choices: []
@@ -77,7 +87,7 @@ MonoBehaviour:
     choices: []
     effects: []
     actions: []
-  - id: remind
+  - id: remind_bread
     speaker: 
     text: "\uD560\uBA38\uB2C8\uB124 \uC6B0\uD3B8\uD568\uC5D0 \uB123\uC5B4 \uC8FC\uBA74
       \uB3FC~ \uAD11\uC7A5\uC5D0\uC11C \uC624\uB978\uCABD \uAE38 \uB05D\uC774\uC57C."
@@ -85,10 +95,55 @@ MonoBehaviour:
     choices: []
     effects: []
     actions: []
-  - id: after
+  - id: after_bread
     speaker: 
-    text: "\uD560\uBA38\uB2C8\uAC00 \uC88B\uC544\uD558\uC168\uC9C0? \uC218\uACE0\uD588\uC5B4~"
-    nextId: rule1
+    text: "\uD560\uBA38\uB2C8\uAC00 \uC88B\uC544\uD558\uC168\uC9C0? \uD560\uBA38\uB2C8\uB3C4
+      \uB108\uD55C\uD14C \uBD80\uD0C1\uD560 \uAC8C \uC788\uB2E4\uB358\uB370~"
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: letter_receive
+    speaker: 
+    text: "\uC751? \uC544\uC774\uAC00 \uB098\uD55C\uD14C \uADF8\uB9BC\uC744?"
+    nextId: letter_look
+    choices: []
+    effects: []
+    actions:
+    - {fileID: 11400000, guid: e783415ee195cac41b7bcaffa8d1a00e, type: 2}
+  - id: letter_look
+    speaker: 
+    text: "\uC5B4\uBA38, \uC6B0\uB9AC \uAC00\uAC8C\uB124! \uC774\uAC74 \uB098, \uC774\uAC74
+      \uD560\uBA38\uB2C8, \uC774\uAC74 \uC544\uC774\u2026 \uADF8\uB9AC\uACE0 \uC774
+      \uAE38\uCB49\uD55C \uAC74 \uB204\uAD74\uAE4C~?"
+    nextId: letter_end
+    choices: []
+    effects: []
+    actions: []
+  - id: letter_end
+    speaker: 
+    text: "\uD6C4\uD6C4, \uC798 \uADF8\uB838\uB124. \uC624\uB298 \uC815\uB9D0 \uC218\uACE0
+      \uB9CE\uC558\uC5B4, {player}."
+    nextId: rule1_again
+    choices: []
+    effects: []
+    actions: []
+  - id: rule1_again
+    speaker: 
+    text: "\uBC8C\uC368 \uD574\uAC00 \uAE30\uC6B0\uB124. \uD574 \uC9C0\uAE30 \uC804\uC5D4
+      \uAF2D \uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uB834~"
+    nextId: 
+    choices: []
+    effects:
+    - key: heard.rule1
+      operation: 0
+      value: 1
+    actions: []
+  - id: done
+    speaker: 
+    text: "\uC624\uB298 \uC218\uACE0 \uB9CE\uC558\uC5B4~ \uD574 \uC9C0\uAE30 \uC804\uC5D4
+      \uAF2D \uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uB834~"
+    nextId: 
     choices: []
     effects: []
     actions: []

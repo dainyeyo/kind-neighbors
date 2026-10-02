@@ -1,0 +1,119 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30d07a71299c29046af4951d44642a04, type: 3}
+  m_Name: Dlg_Child
+  m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Dialogue.DialogueGraph
+  speakerName: "\uC544\uC774"
+  entries:
+  - conditions:
+    - key: delivered.Order_D1_Letter
+      comparison: 0
+      value: 1
+    startNodeId: bye
+  - conditions:
+    - key: accepted.Order_D1_Letter
+      comparison: 0
+      value: 1
+    startNodeId: letter_remind
+  - conditions:
+    - key: delivered.Order_D1_Hat
+      comparison: 0
+      value: 1
+    startNodeId: ask_letter
+  - conditions:
+    - key: accepted.Order_D1_Hat
+      comparison: 0
+      value: 1
+    startNodeId: receive_hat
+  - conditions: []
+    startNodeId: play
+  nodes:
+  - id: play
+    speaker: 
+    text: "\uB180\uC790! \u2026\uC544, \uC77C\uD558\uB294 \uC911\uC774\uAD6C\uB098?
+      \uADF8\uB7FC \uB098\uC911\uC5D0 \uB180\uC790~"
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: receive_hat
+    speaker: 
+    text: "\uC6B0\uC640, \uD560\uBA38\uB2C8 \uBAA8\uC790\uB2E4!"
+    nextId: som_house
+    choices: []
+    effects: []
+    actions:
+    - {fileID: 11400000, guid: 10a7cd5771a32104a94a91ed43d9ba1d, type: 2}
+  - id: som_house
+    speaker: 
+    text: "\uC800\uAE30 \uBD88 \uAEBC\uC9C4 \uC9D1 \uBCF4\uC5EC? \uC19C\uC774 \uC0B4\uB358
+      \uC9D1\uC774\uC57C."
+    nextId: som_house2
+    choices: []
+    effects:
+    - key: heard.som_house
+      operation: 0
+      value: 1
+    actions: []
+  - id: som_house2
+    speaker: 
+    text: "\uC19C\uC740 \uC774\uC81C \uBC24\uC5D0 \uB098\uAC00~ \uADF8\uB798\uC11C
+      \uB0AE\uC5D4 \uC5C6\uC5B4!"
+    nextId: ask_letter
+    choices: []
+    effects: []
+    actions: []
+  - id: ask_letter
+    speaker: 
+    text: "\uC544 \uB9DE\uB2E4! \uC774\uAC70 \uBE75\uC9D1\uC5D0 \uAC16\uB2E4\uC904\uB798?
+      \uB0B4\uAC00 \uADF8\uB9B0 \uADF8\uB9BC\uC774\uC57C."
+    nextId: 
+    choices:
+    - text: "\uADF8\uB798, \uAC16\uB2E4\uC904\uAC8C"
+      nextId: accept_letter
+      conditions: []
+    - text: "\uB098\uC911\uC5D0"
+      nextId: later_letter
+      conditions: []
+    effects: []
+    actions: []
+  - id: accept_letter
+    speaker: 
+    text: "\uD5E4\uD5E4, \uBE75\uC9D1 \uC8FC\uC778\uB2D8\uC774 \uC88B\uC544\uD560
+      \uAC70\uC57C!"
+    nextId: 
+    choices: []
+    effects: []
+    actions:
+    - {fileID: 11400000, guid: 75e3f0cd12931884b88e175ba392ad27, type: 2}
+  - id: later_letter
+    speaker: 
+    text: "\uCE58, \uADF8\uB7FC \uB098\uC911\uC5D0 \uAF2D\uC774\uC57C!"
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: letter_remind
+    speaker: 
+    text: "\uBE68\uB9AC \uAC16\uB2E4\uC918~ \uBE75\uC9D1 \uC8FC\uC778\uB2D8\uD55C\uD14C!"
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: bye
+    speaker: 
+    text: "\uBE75\uC9D1 \uC8FC\uC778\uB2D8\uC774 \uC88B\uC544\uD588\uC5B4? \uD5E4\uD5E4.
+      \uB0B4\uC77C \uB610 \uB180\uC790, {player}!"
+    nextId: 
+    choices: []
+    effects: []
+    actions: []

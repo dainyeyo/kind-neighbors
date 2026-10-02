@@ -8,11 +8,12 @@ namespace KindNeighbors.Save
     /// <summary>
     /// 세이브 파일 형식. JsonUtility는 Dictionary를 직렬화하지 못하므로 플래그는 key/value 목록으로 저장한다.
     /// 형식이 바뀌면 CurrentVersion을 올리고 SaveSystem.Migrate에 변환 코드를 추가한다.
+    /// v1: day, time, flags / v2: texts 추가 (플레이어 이름)
     /// </summary>
     [Serializable]
     public class SaveData
     {
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
 
         [Serializable]
         public struct FlagEntry
@@ -21,10 +22,18 @@ namespace KindNeighbors.Save
             public int value;
         }
 
+        [Serializable]
+        public struct TextEntry
+        {
+            public string key;
+            public string value;
+        }
+
         public int version = CurrentVersion;
         public int day;
         public TimeOfDay time;
         public List<FlagEntry> flags = new();
+        public List<TextEntry> texts = new();
 
         public GamePhase Phase => new(day, time);
 
@@ -33,6 +42,8 @@ namespace KindNeighbors.Save
             var data = new SaveData { day = phase.day, time = phase.time };
             foreach (var pair in gameFlags.All)
                 data.flags.Add(new FlagEntry { key = pair.Key, value = pair.Value });
+            foreach (var pair in gameFlags.AllTexts)
+                data.texts.Add(new TextEntry { key = pair.Key, value = pair.Value });
             return data;
         }
 
@@ -41,6 +52,8 @@ namespace KindNeighbors.Save
             gameFlags.Clear();
             foreach (var entry in flags)
                 gameFlags.SetInt(entry.key, entry.value);
+            foreach (var entry in texts)
+                gameFlags.SetText(entry.key, entry.value);
         }
     }
 }

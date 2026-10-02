@@ -11,7 +11,7 @@ namespace KindNeighbors.Dialogue
         [SerializeField] GameFlags flags;
         [SerializeField] DialogueGraphEventChannel dialogueRequested;
 
-        public string Prompt => "말 걸기";
+        public string Prompt => $"{graph.speakerName}에게 말 걸기";
 
         public bool CanInteract(PlayerInteractor interactor) => graph.FindStartNode(flags) != null;
 

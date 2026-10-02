@@ -54,8 +54,12 @@ namespace KindNeighbors.Save
         /// <summary>이전 버전 세이브를 현재 형식으로 변환한다. 버전이 올라갈 때마다 단계를 추가한다.</summary>
         static void Migrate(SaveData data)
         {
-            // 예: if (data.version < 2) { ...v1 → v2 변환...; data.version = 2; }
-            data.version = SaveData.CurrentVersion;
+            if (data.version < 2)
+            {
+                // v1에는 texts가 없다. 이름이 비어 있으면 GameFlowController가 이름 입력부터 다시 받는다.
+                data.texts ??= new();
+                data.version = 2;
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using KindNeighbors.Player;
 using UnityEngine;
 
@@ -35,8 +36,14 @@ namespace KindNeighbors.Interaction
             if (Vector3.Distance(eye, hit.point) > interactRange)
                 return null;
 
-            var target = hit.collider.GetComponentInParent<IInteractable>();
-            return target != null && target.CanInteract(this) ? target : null;
+            // 한 오브젝트에 여러 IInteractable이 있을 수 있다 (예: NPC = 대화 + 배달 목적지). 지금 가능한 첫 번째를 고른다.
+            hit.collider.GetComponentsInParent(false, candidates);
+            foreach (var candidate in candidates)
+                if (candidate.CanInteract(this))
+                    return candidate;
+            return null;
         }
+
+        readonly List<IInteractable> candidates = new();
     }
 }

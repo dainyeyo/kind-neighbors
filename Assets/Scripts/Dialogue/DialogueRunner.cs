@@ -26,7 +26,14 @@ namespace KindNeighbors.Dialogue
         public IReadOnlyList<DialogueChoice> Choices => availableChoices;
 
         public string CurrentSpeaker =>
-            Current == null ? string.Empty : string.IsNullOrEmpty(Current.speaker) ? graph.speakerName : Current.speaker;
+            Current == null ? string.Empty : Format(string.IsNullOrEmpty(Current.speaker) ? graph.speakerName : Current.speaker);
+
+        public string CurrentText => Current == null ? string.Empty : Format(Current.text);
+
+        public string FormatChoice(DialogueChoice choice) => Format(choice.text);
+
+        /// <summary>대사 안의 {player} 를 플레이어 이름으로 바꾼다.</summary>
+        string Format(string text) => text.Replace("{player}", flags.GetText(FlagKeys.PlayerName));
 
         void OnEnable() => dialogueRequested.Raised += OnDialogueRequested;
         void OnDisable() => dialogueRequested.Raised -= OnDialogueRequested;

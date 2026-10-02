@@ -41,7 +41,7 @@ namespace KindNeighbors.EditorTools
             Light sun = CreateLighting();
             Transform map = new GameObject("Map").transform;
             CreateGround(map);
-            CreateBuildings(map, out Transform bakeryNpcSpot, out Transform mailboxSpot, out GameObject playerDoor);
+            CreateBuildings(map, out Transform bakeryNpcSpot, out Transform grandmaNpcSpot, out Transform mailboxSpot, out GameObject playerDoor);
             CreateForestEdge(map);
 
             // 시스템: 서로 직접 참조하지 않고 데이터 에셋(플래그, 이벤트 채널)만 공유한다
@@ -60,24 +60,36 @@ namespace KindNeighbors.EditorTools
             var deliveryManager = systems.AddComponent<DeliveryManager>();
             SetRef(deliveryManager, "flags", data.flags);
             SetRef(deliveryManager, "orderRequested", data.orderRequested);
+            SetRef(deliveryManager, "deliverRequested", data.deliverRequested);
             SetRef(deliveryManager, "orderAccepted", data.orderAccepted);
             SetRef(deliveryManager, "orderCompleted", data.orderCompleted);
 
             var runner = systems.AddComponent<DialogueRunner>();
             SetRef(runner, "flags", data.flags);
             SetRef(runner, "dialogueRequested", data.dialogueRequested);
-            SetRef(runner, "dialogueActive", data.dialogueActive);
+            SetRef(runner, "dialogueActive", data.inputLock);
             SetRef(systems.AddComponent<DialogueUI>(), "runner", runner);
 
-            // 낮 NPC: 밤에는 사라진다
+            var nameEntry = systems.AddComponent<NameEntryUI>();
+            SetRef(nameEntry, "flags", data.flags);
+            SetRef(nameEntry, "inputLockRequested", data.inputLock);
+
+            // 낮 NPC: 밤에는 사라진다. 직접 배달받는 NPC는 머리 위에 목적지 마커가 뜬다.
             Transform npcs = new GameObject("NPCs_Daytime").transform;
-            CreateBakeryOwner(bakeryNpcSpot, npcs, data);
+            CreateNpc("NPC_BakeryOwner", npcs, bakeryNpcSpot.position, bakeryNpcSpot.rotation, 1.5f, 0.8f,
+                "NpcBakery", new Color(0.9f, 0.55f, 0.4f), data.bakerDialogue, data, deliveryManager, PrototypeData.BakerSpot);
+            CreateNpc("NPC_Grandma", npcs, grandmaNpcSpot.position, grandmaNpcSpot.rotation, 1.2f, 0.75f,
+                "NpcGrandma", new Color(0.65f, 0.55f, 0.75f), data.grandmaDialogue, data, deliveryManager, null);
+            // 아이: 불 꺼진 솜의 집 앞 북쪽 길에서 논다. 털모자를 전하러 가는 길에 솜의 집을 지나치게 된다.
+            CreateNpc("NPC_Child", npcs, new Vector3(3.2f, 0f, 12f), Quaternion.Euler(0f, 200f, 0f), 0.95f, 0.6f,
+                "NpcChild", new Color(0.55f, 0.75f, 0.95f), data.childDialogue, data, deliveryManager, PrototypeData.ChildSpot);
+
             var npcSet = new GameObject("PhaseSet_DaytimeNPCs").AddComponent<PhaseObjectSet>();
             SetRef(npcSet, "phaseChanged", data.phaseChanged);
             SetArray(npcSet, "targets", npcs.gameObject);
             SetEnumArray(npcSet, "activeTimes", (int)TimeOfDay.Morning, (int)TimeOfDay.Evening);
 
-            CreateMailbox(mailboxSpot, deliveryManager, "grandma_house");
+            CreateMailbox(mailboxSpot, deliveryManager, PrototypeData.GrandmaMailbox);
 
             var homeDoor = playerDoor.AddComponent<PhaseAdvanceTrigger>();
             SetRef(homeDoor, "flow", flow);
@@ -136,7 +148,7 @@ namespace KindNeighbors.EditorTools
             Box("Road_South", map, new Vector3(0f, 0.01f, -10f), new Vector3(3f, 0.02f, 10f), "Path", default);
         }
 
-        static void CreateBuildings(Transform map, out Transform bakeryNpcSpot, out Transform mailboxSpot, out GameObject playerDoor)
+        static void CreateBuildings(Transform map, out Transform bakeryNpcSpot, out Transform grandmaNpcSpot, out Transform mailboxSpot, out GameObject playerDoor)
         {
             Transform buildings = new GameObject("Buildings").transform;
             buildings.SetParent(map);
@@ -150,10 +162,11 @@ namespace KindNeighbors.EditorTools
             Transform grandma = House("House_Grandma", buildings, new Vector3(16f, 0f, 0f), -90f, new Vector3(6f, 3.5f, 5f),
                 "HouseGrandma", new Color(0.8f, 0.7f, 0.9f));
             mailboxSpot = Spot("MailboxSpot", grandma, new Vector3(1.8f, 0f, 3.8f));
+            grandmaNpcSpot = Spot("NpcSpot", grandma, new Vector3(-1.6f, 0f, 3.4f));
 
             // 솜의 집 (불 꺼진 집, 북동쪽)
             House("House_Som (Dark)", buildings, new Vector3(9f, 0f, 14f), -90f, new Vector3(5f, 3.5f, 5f),
-                "HouseSom", new Color(0.35f, 0.33f, 0.35f));
+                "HouseSom", new Color(0.35f, 0.33f, 0.35f), lightsOn: false);
 
             // 그 외 주민 집
             House("House_A", buildings, new Vector3(-8f, 0f, 14f), 90f, new Vector3(5f, 3.5f, 5f), "HouseA", new Color(0.7f, 0.85f, 0.95f));
@@ -188,19 +201,46 @@ namespace KindNeighbors.EditorTools
 
         // ---------- 상호작용 대상 ----------
 
-        static void CreateBakeryOwner(Transform spot, Transform parent, PrototypeData data)
+        /// <summary>
+        /// 임시 NPC: 캡슐 몸 + 얼굴 방향 표시. 캐릭터 모델이 완성되면 Body 아래를 교체한다.
+        /// destinationId가 있으면 직접 배달받는 목적지가 되어 머리 위에 마커가 뜬다.
+        /// </summary>
+        static void CreateNpc(string name, Transform parent, Vector3 position, Quaternion rotation, float height, float width,
+            string matKey, Color color, DialogueGraph graph, PrototypeData data, DeliveryManager manager, string destinationId)
         {
-            var npc = Prim(PrimitiveType.Capsule, "NPC_BakeryOwner", parent, spot.position + Vector3.up * 0.75f, new Vector3(0.8f, 0.75f, 0.8f),
-                "NpcBakery", new Color(0.9f, 0.55f, 0.4f));
-            npc.transform.rotation = spot.rotation;
-            Prim(PrimitiveType.Cube, "Face", npc.transform, npc.transform.position + npc.transform.forward * 0.4f + Vector3.up * 0.3f,
-                new Vector3(0.3f, 0.15f, 0.1f), "Face", new Color(0.2f, 0.15f, 0.15f)).transform.rotation = spot.rotation;
-            Object.DestroyImmediate(npc.transform.Find("Face").GetComponent<Collider>());
+            Transform root = new GameObject(name).transform;
+            root.SetParent(parent);
+            root.SetPositionAndRotation(position, rotation);
 
-            var dialogue = npc.AddComponent<NpcDialogue>();
-            SetRef(dialogue, "graph", data.bakerDialogue);
+            var body = Prim(PrimitiveType.Capsule, "Body", root, position + Vector3.up * (height / 2f), new Vector3(width, height / 2f, width), matKey, color);
+            body.transform.rotation = rotation;
+            var face = Prim(PrimitiveType.Cube, "Face", root, position + Vector3.up * (height * 0.72f) + root.forward * (width / 2f),
+                new Vector3(width * 0.4f, 0.12f, 0.1f), "Face", new Color(0.2f, 0.15f, 0.15f));
+            face.transform.rotation = rotation;
+            Object.DestroyImmediate(face.GetComponent<Collider>());
+
+            var dialogue = root.gameObject.AddComponent<NpcDialogue>();
+            SetRef(dialogue, "graph", graph);
             SetRef(dialogue, "flags", data.flags);
             SetRef(dialogue, "dialogueRequested", data.dialogueRequested);
+
+            if (string.IsNullOrEmpty(destinationId))
+                return;
+
+            var marker = CreateMarker(root, position + Vector3.up * (height + 0.7f));
+            var destination = root.gameObject.AddComponent<DeliveryDestination>();
+            SetRef(destination, "manager", manager);
+            SetString(destination, "destinationId", destinationId);
+            SetBool(destination, "dropOffHere", false);
+            SetRef(destination, "marker", marker);
+        }
+
+        static GameObject CreateMarker(Transform parent, Vector3 position)
+        {
+            var marker = Prim(PrimitiveType.Cube, "DestinationMarker", parent, position, Vector3.one * 0.35f, "Marker", new Color(0.3f, 0.85f, 0.95f));
+            marker.transform.rotation = Quaternion.Euler(45f, 0f, 45f);
+            Object.DestroyImmediate(marker.GetComponent<Collider>());
+            return marker;
         }
 
         static void CreateMailbox(Transform spot, DeliveryManager manager, string destinationId)
@@ -212,9 +252,7 @@ namespace KindNeighbors.EditorTools
             Prim(PrimitiveType.Cube, "Box", mailbox, spot.position + Vector3.up * 1.1f, new Vector3(0.5f, 0.4f, 0.7f), "Mailbox", new Color(0.85f, 0.3f, 0.3f))
                 .transform.rotation = spot.rotation;
 
-            var marker = Prim(PrimitiveType.Cube, "DestinationMarker", mailbox, spot.position + Vector3.up * 2.4f, Vector3.one * 0.35f, "Marker", new Color(0.3f, 0.85f, 0.95f));
-            marker.transform.rotation = Quaternion.Euler(45f, 0f, 45f);
-            Object.DestroyImmediate(marker.GetComponent<Collider>());
+            var marker = CreateMarker(mailbox, spot.position + Vector3.up * 2.4f);
 
             var destination = mailbox.gameObject.AddComponent<DeliveryDestination>();
             SetRef(destination, "manager", manager);
@@ -261,7 +299,7 @@ namespace KindNeighbors.EditorTools
             SetRef(controller, "body", body);
             SetRef(controller, "cameraPivot", pivot);
             SetRef(controller, "playerCamera", cam);
-            SetRef(controller, "inputLockRequested", data.dialogueActive);
+            SetRef(controller, "inputLockRequested", data.inputLock);
 
             interactor = root.AddComponent<PlayerInteractor>();
             SetRef(interactor, "player", controller);
@@ -271,8 +309,10 @@ namespace KindNeighbors.EditorTools
 
         // ---------- 헬퍼 ----------
 
-        static Transform House(string name, Transform parent, Vector3 position, float yaw, Vector3 size, string matKey, Color color)
+        static Transform House(string name, Transform parent, Vector3 position, float yaw, Vector3 size, string matKey, Color color, bool lightsOn = true)
         {
+            string windowKey = lightsOn ? "Window" : "WindowDark";
+            Color windowColor = lightsOn ? new Color(0.95f, 0.9f, 0.6f) : new Color(0.12f, 0.12f, 0.14f);
             Transform house = new GameObject(name).transform;
             house.SetParent(parent);
             house.SetPositionAndRotation(position, Quaternion.Euler(0f, yaw, 0f));
@@ -280,8 +320,8 @@ namespace KindNeighbors.EditorTools
             BoxLocal("Walls", house, new Vector3(0f, size.y / 2f, 0f), size, matKey, color);
             BoxLocal("Roof", house, new Vector3(0f, size.y + 0.4f, 0f), new Vector3(size.x + 0.6f, 0.8f, size.z + 0.6f), "Roof", new Color(0.55f, 0.35f, 0.3f));
             BoxLocal("Door", house, new Vector3(0f, 1f, size.z / 2f + 0.05f), new Vector3(1.1f, 2f, 0.1f), "Door", new Color(0.5f, 0.35f, 0.22f));
-            BoxLocal("Window_L", house, new Vector3(-size.x / 3.2f, size.y * 0.6f, size.z / 2f + 0.05f), new Vector3(0.9f, 0.9f, 0.1f), "Window", new Color(0.95f, 0.9f, 0.6f));
-            BoxLocal("Window_R", house, new Vector3(size.x / 3.2f, size.y * 0.6f, size.z / 2f + 0.05f), new Vector3(0.9f, 0.9f, 0.1f), "Window", default);
+            BoxLocal("Window_L", house, new Vector3(-size.x / 3.2f, size.y * 0.6f, size.z / 2f + 0.05f), new Vector3(0.9f, 0.9f, 0.1f), windowKey, windowColor);
+            BoxLocal("Window_R", house, new Vector3(size.x / 3.2f, size.y * 0.6f, size.z / 2f + 0.05f), new Vector3(0.9f, 0.9f, 0.1f), windowKey, windowColor);
             return house;
         }
 
@@ -353,6 +393,13 @@ namespace KindNeighbors.EditorTools
         {
             var so = new SerializedObject(target);
             so.FindProperty(field).stringValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static void SetBool(Object target, string field, bool value)
+        {
+            var so = new SerializedObject(target);
+            so.FindProperty(field).boolValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 

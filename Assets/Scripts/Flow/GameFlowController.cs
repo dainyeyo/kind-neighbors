@@ -17,9 +17,14 @@ namespace KindNeighbors.Flow
         [SerializeField] PhaseEventChannel phaseChanged;
         [SerializeField] VoidEventChannel advanceRequested;
         [SerializeField] bool loadSaveOnStart = true;
+        [Tooltip("플레이어 이름이 정해질 때까지 첫 시간대를 시작하지 않는다 (이름 입력 화면)")]
+        [SerializeField] bool requirePlayerName = true;
 
         readonly StateMachine machine = new();
         int phaseIndex = -1;
+        int pendingStartIndex;
+
+        public bool HasStarted => phaseIndex >= 0;
 
         PhaseState CurrentState => machine.Current as PhaseState;
 
@@ -37,21 +42,30 @@ namespace KindNeighbors.Flow
 
         void Start()
         {
-            int startIndex = 0;
+            pendingStartIndex = 0;
             if (loadSaveOnStart && SaveSystem.TryLoad(out SaveData save))
             {
                 int savedIndex = config.IndexOf(save.Phase);
                 if (savedIndex >= 0)
                 {
                     save.ApplyFlags(flags);
-                    startIndex = savedIndex;
+                    pendingStartIndex = savedIndex;
                     Debug.Log($"[GameFlow] 세이브 불러옴: {save.Phase}");
                 }
             }
-            EnterPhase(startIndex);
         }
 
-        void Update() => machine.Tick();
+        void Update()
+        {
+            if (!HasStarted)
+            {
+                // 이름이 정해진 뒤에 시작해야 Day 시작 자동 저장에 이름이 포함된다
+                if (!requirePlayerName || !string.IsNullOrEmpty(flags.GetText(FlagKeys.PlayerName)))
+                    EnterPhase(pendingStartIndex);
+                return;
+            }
+            machine.Tick();
+        }
 
         void OnAdvanceRequested()
         {

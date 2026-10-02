@@ -33,13 +33,13 @@ namespace KindNeighbors.UI
 
             GUILayout.BeginArea(new Rect(area.x + 20, area.y + 14, area.width - 40, area.height - 28));
             GUILayout.Label(runner.CurrentSpeaker, speakerStyle);
-            GUILayout.Label(runner.Current.text, textStyle);
+            GUILayout.Label(runner.CurrentText, textStyle);
             GUILayout.FlexibleSpace();
 
             if (runner.Choices.Count > 0)
             {
                 for (int i = 0; i < runner.Choices.Count; i++)
-                    GUILayout.Label($"{i + 1}. {runner.Choices[i].text}", textStyle);
+                    GUILayout.Label($"{i + 1}. {runner.FormatChoice(runner.Choices[i])}", textStyle);
             }
             else
             {

@@ -12,6 +12,9 @@ namespace KindNeighbors.Core.Flags
         /// <summary>규칙 위반 횟수. 엔딩 판정에 쓴다.</summary>
         public const string RuleViolations = "rule_violations";
 
+        /// <summary>시작할 때 입력받는 플레이어 이름 (텍스트 플래그). 대사에서는 {player} 로 쓴다.</summary>
+        public const string PlayerName = "player_name";
+
         public static string Accepted(string orderId) => $"accepted.{orderId}";
         public static string Delivered(string orderId) => $"delivered.{orderId}";
     }

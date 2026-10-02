@@ -20,4 +20,10 @@ MonoBehaviour:
   - key: delivered.Order_D1_Bread
     comparison: 0
     value: 1
+  - key: delivered.Order_D1_Hat
+    comparison: 0
+    value: 1
+  - key: delivered.Order_D1_Letter
+    comparison: 0
+    value: 1
   advancePrompt: 
