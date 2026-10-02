@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using KindNeighbors.Core.Events;
 using KindNeighbors.Core.Flags;
+using KindNeighbors.Core.Text;
 using UnityEngine;
 
 namespace KindNeighbors.Dialogue
@@ -32,8 +33,7 @@ namespace KindNeighbors.Dialogue
 
         public string FormatChoice(DialogueChoice choice) => Format(choice.text);
 
-        /// <summary>대사 안의 {player} 를 플레이어 이름으로 바꾼다.</summary>
-        string Format(string text) => text.Replace("{player}", flags.GetText(FlagKeys.PlayerName));
+        string Format(string text) => TextFormatter.Format(text, flags);
 
         void OnEnable() => dialogueRequested.Raised += OnDialogueRequested;
         void OnDisable() => dialogueRequested.Raised -= OnDialogueRequested;

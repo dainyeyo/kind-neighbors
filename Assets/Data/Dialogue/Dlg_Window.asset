@@ -1,0 +1,119 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30d07a71299c29046af4951d44642a04, type: 3}
+  m_Name: Dlg_Window
+  m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Dialogue.DialogueGraph
+  speakerName: 
+  entries:
+  - conditions:
+    - key: knock.d2
+      comparison: 0
+      value: 1
+    - key: curtain.closed
+      comparison: 0
+      value: 1
+    startNodeId: curtain
+  - conditions:
+    - key: knock.d2
+      comparison: 0
+      value: 1
+    startNodeId: voice
+  nodes:
+  - id: curtain
+    speaker: 
+    text: "\uCEE4\uD2BC \uB108\uBA38\uC5D0\uC11C \uB611\uB611, \uB611\uB611."
+    nextId: 
+    choices:
+    - text: "\uCEE4\uD2BC\uC744 \uAC77\uB294\uB2E4"
+      nextId: reveal
+      conditions: []
+    - text: "\uAC00\uB9CC\uD788 \uC788\uB294\uB2E4"
+      nextId: stay
+      conditions: []
+    effects: []
+    actions: []
+  - id: reveal
+    speaker: 
+    text: "\uCC3D\uBC16\uC5D0 \uB204\uAD70\uAC00 \uC11C \uC788\uB2E4. \uD0A4\uAC00
+      \uC544\uC8FC \uD06C\uB2E4."
+    nextId: voice
+    choices: []
+    effects:
+    - key: curtain.closed
+      operation: 0
+      value: 0
+    actions: []
+  - id: stay
+    speaker: 
+    text: "\u2026"
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: voice
+    speaker: "\uCC3D\uBC16\uC758 \uBAA9\uC18C\uB9AC"
+    text: "\uBC30\uB2EC \uC654\uC5B4\uC694~ \uB530\uB73B\uD55C \uBE75\uC774\uC5D0\uC694~
+      \uCC3D\uBB38 \uC880 \uC5F4\uC5B4 \uC904\uB798\uC694~?"
+    nextId: 
+    choices:
+    - text: "\uCC3D\uBB38\uC744 \uC5F0\uB2E4"
+      nextId: open
+      conditions: []
+    - text: "\uC5F4\uC9C0 \uC54A\uB294\uB2E4"
+      nextId: ignore
+      conditions: []
+    effects: []
+    actions: []
+  - id: open
+    speaker: 
+    text: "\uCC3D\uBB38\uC744 \uC5F4\uC5C8\uB2E4. \u2026\uC544\uBB34\uB3C4 \uC5C6\uB2E4."
+    nextId: thread
+    choices: []
+    effects:
+    - key: rule_violations
+      operation: 1
+      value: 1
+    - key: window.opened.d2
+      operation: 0
+      value: 1
+    - key: knock.d2
+      operation: 0
+      value: 0
+    - key: event.d2_knock
+      operation: 0
+      value: 1
+    actions: []
+  - id: thread
+    speaker: 
+    text: "\uCC3D\uD2C0\uC5D0 \uB178\uB780 \uC2E4 \uD55C \uAC00\uB2E5\uC774 \uAC78\uB824
+      \uC788\uB2E4."
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: ignore
+    speaker: 
+    text: "\uCC3D\uBB38\uC744 \uC5F4\uC9C0 \uC54A\uC558\uB2E4. \u2026\uC18C\uB9AC\uAC00
+      \uBA4E\uC5C8\uB2E4."
+    nextId: 
+    choices: []
+    effects:
+    - key: window.ignored.d2
+      operation: 0
+      value: 1
+    - key: knock.d2
+      operation: 0
+      value: 0
+    - key: event.d2_knock
+      operation: 0
+      value: 1
+    actions: []

@@ -1,3 +1,4 @@
+using KindNeighbors.Core.Events;
 using KindNeighbors.Delivery;
 using KindNeighbors.Flow;
 using KindNeighbors.Interaction;
@@ -14,12 +15,18 @@ namespace KindNeighbors.UI
         [SerializeField] PhaseEventChannel phaseChanged;
         [SerializeField] DeliveryOrderEventChannel orderAccepted;
         [SerializeField] DeliveryOrderEventChannel orderCompleted;
+        [Tooltip("소리 대신 쓰는 자막 (사운드가 들어오기 전까지)")]
+        [SerializeField] StringEventChannel subtitle;
         [SerializeField] float toastDuration = 2.5f;
+        [SerializeField] float subtitleDuration = 3.5f;
 
         string phaseText = string.Empty;
         DeliveryOrder currentOrder;
         string toast;
         float toastUntil;
+        string subtitleText;
+        float subtitleUntil;
+        GUIStyle subtitleStyle;
         GUIStyle labelStyle;
         GUIStyle centerStyle;
         GUIStyle toastStyle;
@@ -29,6 +36,7 @@ namespace KindNeighbors.UI
             phaseChanged.Raised += OnPhaseChanged;
             orderAccepted.Raised += OnOrderAccepted;
             orderCompleted.Raised += OnOrderCompleted;
+            subtitle.Raised += OnSubtitle;
         }
 
         void OnDisable()
@@ -36,6 +44,13 @@ namespace KindNeighbors.UI
             phaseChanged.Raised -= OnPhaseChanged;
             orderAccepted.Raised -= OnOrderAccepted;
             orderCompleted.Raised -= OnOrderCompleted;
+            subtitle.Raised -= OnSubtitle;
+        }
+
+        void OnSubtitle(string text)
+        {
+            subtitleText = text;
+            subtitleUntil = Time.time + subtitleDuration;
         }
 
         void OnPhaseChanged(PhaseDefinition definition)
@@ -85,6 +100,11 @@ namespace KindNeighbors.UI
             // 알림
             if (!string.IsNullOrEmpty(toast) && Time.time < toastUntil)
                 GUI.Label(new Rect(0, h * 0.22f, w, 40), toast, toastStyle);
+
+            // 자막 (기울임꼴, 화면 아래쪽)
+            subtitleStyle ??= new GUIStyle(centerStyle) { fontSize = 22, fontStyle = FontStyle.Italic, normal = { textColor = new Color(0.9f, 0.9f, 0.95f) } };
+            if (!string.IsNullOrEmpty(subtitleText) && Time.time < subtitleUntil)
+                GUI.Label(new Rect(0, h * 0.6f, w, 34), subtitleText, subtitleStyle);
 
             // 조작 안내
             string view = player.ViewMode == ViewMode.FirstPerson ? "1인칭" : "3인칭";

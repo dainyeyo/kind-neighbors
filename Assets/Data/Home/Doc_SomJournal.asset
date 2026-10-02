@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77503d03735368d49b7c838fe4c3125c, type: 3}
+  m_Name: Doc_SomJournal
+  m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Home.DocumentAsset
+  title: "\uBC30\uB2EC \uC77C\uC9C0 (\uD45C\uC9C0\uC758 \uC774\uB984\uC774 \uAE01\uD600
+    \uC788\uB2E4)"
+  paragraphs:
+  - conditions:
+    - key: home.d1
+      comparison: 0
+      value: 1
+    text: "\u2014 \uCCAB\uC9F8 \uB0A0 \u2014\n\uBE75\uC9D1 \uC8FC\uC778\uAED8 \uBC30\uB2EC
+      \uAC00\uBC29\uC744 \uBC1B\uC558\uB2E4. \uC0C8\uAC83\uC774\uB2E4.\n\uBE75\uC744
+      \uD560\uBA38\uB2C8\uAED8 \uBC30\uB2EC\uD588\uB2E4.\n\uD560\uBA38\uB2C8\uAC00
+      \uB2F5\uB840\uB85C \uD138\uC2E4 \uBB49\uCE58\uB97C \uC8FC\uC168\uB2E4.\n\uD574
+      \uC9C0\uAE30 \uC804\uC5D0 \uC9D1\uC5D0 \uB3CC\uC544\uC654\uB2E4.\n\uCC3D\uBC16\uC73C\uB85C
+      \uD0A4 \uD070 \uB204\uAD70\uAC00\uAC00 \uC9C0\uB098\uAC14\uB2E4. \uC544\uB9C8
+      \uC774\uC6C3\uC774\uACA0\uC9C0."
+  - conditions:
+    - key: home.d2
+      comparison: 0
+      value: 1
+    text: "\u2014 \uB458\uC9F8 \uB0A0 \u2014\n\uD560\uBA38\uB2C8\uAC00 \uBC24\uC5D0
+      \uB611\uB611 \uC18C\uB9AC\uAC00 \uB098\uBA74 \uC5F4\uC9C0 \uB9D0\uB77C\uACE0
+      \uD558\uC168\uB2E4. \uBC14\uB78C\uC774\uB77C\uACE0.\n\uCC3D\uBB38\uC5D0\uC11C
+      \uB611\uB611 \uC18C\uB9AC\uAC00 \uB0AC\uB2E4. \uBE75\uC9D1 \uC8FC\uC778 \uBAA9\uC18C\uB9AC\uC600\uB2E4.\n\u2026\uC5F4\uC5B4
+      \uBD24\uB2E4."
+  - conditions:
+    - key: home.d3
+      comparison: 0
+      value: 1
+    text: "\u2014 \uC14B\uC9F8 \uB0A0 \u2014\n\uC694\uC998 \uB2E4\uB4E4 \uB0B4\uAC00
+      \uCEE4 \uBCF4\uC778\uB2E4\uACE0 \uD55C\uB2E4.\n\uD560\uBA38\uB2C8\uAC00 \uB178\uB780
+      \uBAA9\uB3C4\uB9AC\uB97C \uB5A0 \uC8FC\uC168\uB2E4. \uB530\uB73B\uD558\uB2E4.\n\uC624\uB298
+      \uBC24\uC5D4 \uC232 \uACBD\uACC4\uB85C \uB3C4\uC2DC\uB77D\uC744 \uAC00\uC838\uAC04\uB2E4.
+      \uC774\uBC88\uC5D4 \uBC1B\uB294 \uC0AC\uB78C"
+  emptyText: "(\uAC00\uBC29 \uC548\uC8FC\uBA38\uB2C8\uC5D0 \uB0A1\uC740 \uC218\uCCA9\uC774
+    \uC788\uB2E4. \uC544\uC9C1\uC740 \uD3BC\uCCD0 \uBCFC \uB9C8\uC74C\uC774 \uB4E4\uC9C0
+    \uC54A\uB294\uB2E4.)"

@@ -16,6 +16,12 @@ namespace KindNeighbors.Flow
         [Tooltip("비어 있으면 조건이 충족되는 즉시 자동으로 넘어간다.\n값이 있으면 PhaseAdvanceTrigger(예: 집 문)에서 이 문구로 플레이어가 직접 넘긴다.")]
         public string advancePrompt;
 
+        [Tooltip("이 시간대에 들어갈 때 플레이어를 옮길 SpawnPoint id (예: 아침엔 침대 옆). 비어 있으면 그 자리에 둔다.")]
+        public string spawnOnEnter;
+
+        [Tooltip("이 시간대에 들어갈 때 적용할 플래그 (예: 밤마다 커튼·불·문 상태 초기화)")]
+        public FlagEffect[] onEnter;
+
         public bool AutoAdvance => string.IsNullOrEmpty(advancePrompt);
     }
 }

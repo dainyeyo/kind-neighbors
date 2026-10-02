@@ -27,6 +27,7 @@ namespace KindNeighbors.Flow
         {
             flags.SetInt(FlagKeys.Day, Definition.phase.day);
             flags.SetInt(FlagKeys.TimeOfDay, (int)Definition.phase.time);
+            FlagEffect.ApplyAll(Definition.onEnter, flags);
             phaseChanged.Raise(Definition);
         }
 

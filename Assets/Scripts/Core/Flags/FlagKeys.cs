@@ -15,6 +15,11 @@ namespace KindNeighbors.Core.Flags
         /// <summary>시작할 때 입력받는 플레이어 이름 (텍스트 플래그). 대사에서는 {player} 로 쓴다.</summary>
         public const string PlayerName = "player_name";
 
+        // 잠들기 전 루틴. 규칙 위반으로 세지 않고, 밤 이벤트가 읽는다.
+        public const string CurtainClosed = "curtain.closed";
+        public const string LampOff = "lamp.off";
+        public const string DoorLocked = "door.locked";
+
         public static string Accepted(string orderId) => $"accepted.{orderId}";
         public static string Delivered(string orderId) => $"delivered.{orderId}";
     }

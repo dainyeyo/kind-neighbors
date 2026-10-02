@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77503d03735368d49b7c838fe4c3125c, type: 3}
+  m_Name: Doc_MyJournal
+  m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Home.DocumentAsset
+  title: "{player}\uC758 \uBC30\uB2EC \uC77C\uC9C0"
+  paragraphs:
+  - conditions: []
+    text: "\u2014 \uCCAB\uC9F8 \uB0A0 \u2014"
+  - conditions:
+    - key: has.bag
+      comparison: 0
+      value: 1
+    text: "\uBE75\uC9D1 \uC8FC\uC778\uAED8 \uB0A1\uC740 \uBC30\uB2EC \uAC00\uBC29\uC744
+      \uBC1B\uC558\uB2E4. \uC804 \uBC30\uB2EC\uC6D0\uC774 \uC4F0\uB358 \uAC70\uB77C\uACE0
+      \uD588\uB2E4."
+  - conditions:
+    - key: delivered.Order_D1_Bread
+      comparison: 0
+      value: 1
+    text: "\uBE75\uC744 \uD560\uBA38\uB2C8\uAED8 \uBC30\uB2EC\uD588\uB2E4."
+  - conditions:
+    - key: gift.yarn
+      comparison: 0
+      value: 1
+    text: "\uD560\uBA38\uB2C8\uAC00 \uB2F5\uB840\uB85C \uD138\uC2E4 \uBB49\uCE58\uB97C
+      \uC8FC\uC168\uB2E4."
+  - conditions:
+    - key: delivered.Order_D1_Hat
+      comparison: 0
+      value: 1
+    text: "\uD560\uBA38\uB2C8\uC758 \uD138\uBAA8\uC790\uB97C \uC544\uC774\uC5D0\uAC8C
+      \uC804\uD588\uB2E4. \uC544\uC774\uB294 \uBD88 \uAEBC\uC9C4 \uC9D1 \uC55E\uC5D0\uC11C
+      \uB180\uACE0 \uC788\uC5C8\uB2E4."
+  - conditions:
+    - key: gift.drawing
+      comparison: 0
+      value: 1
+    text: "\uC544\uC774\uAC00 \uADF8\uB9B0 \uADF8\uB9BC\uC744 \uBE75\uC9D1 \uC8FC\uC778\uAED8
+      \uC804\uD588\uB2E4. \uBE75\uC9D1 \uC8FC\uC778\uC774 \uADF8\uB9BC\uC744 \uB0B4\uAC8C
+      \uC8FC\uC5C8\uB2E4."
+  - conditions:
+    - key: home.d1
+      comparison: 0
+      value: 1
+    text: "\uD574 \uC9C0\uAE30 \uC804\uC5D0 \uC9D1\uC5D0 \uB3CC\uC544\uC654\uB2E4."
+  - conditions:
+    - key: seen.d1_silhouette
+      comparison: 0
+      value: 1
+    text: "\uCC3D\uBC16\uC73C\uB85C \uBB34\uC5B8\uAC00 \uC9C0\uB098\uAC14\uB2E4.
+      \uD0A4\uAC00 \uC544\uC8FC \uCEF8\uB2E4."
+  - conditions:
+    - key: event.d1_silhouette
+      comparison: 0
+      value: 1
+    - key: seen.d1_silhouette
+      comparison: 0
+      value: 0
+    text: "\uBC24\uC5D0 \uBC16\uC5D0\uC11C \uB290\uB9B0 \uBC1C\uC18C\uB9AC\uAC00
+      \uB0AC\uB2E4."
+  - conditions:
+    - key: day
+      comparison: 3
+      value: 2
+    text: "\u2014 \uB458\uC9F8 \uB0A0 \u2014"
+  - conditions:
+    - key: day
+      comparison: 3
+      value: 2
+    text: "\uC624\uB298\uB3C4 \uBC30\uB2EC\uC744 \uD588\uB2E4."
+  - conditions:
+    - key: heard.rule2
+      comparison: 0
+      value: 1
+    text: "\uD560\uBA38\uB2C8\uAC00 \uBC24\uC5D0 \uB611\uB611 \uC18C\uB9AC\uAC00
+      \uB098\uBA74 \uC5F4\uC9C0 \uB9D0\uB77C\uACE0 \uD558\uC168\uB2E4. \uBC14\uB78C\uC774\uB77C\uACE0."
+  - conditions:
+    - key: window.ignored.d2
+      comparison: 0
+      value: 1
+    text: "\uCC3D\uBB38\uC5D0\uC11C \uC18C\uB9AC\uAC00 \uB0AC\uB2E4. \uC5F4\uC9C0
+      \uC54A\uC558\uB2E4. \uBC14\uB78C\uC774\uC5C8\uC744 \uAC83\uC774\uB2E4."
+  - conditions:
+    - key: window.opened.d2
+      comparison: 0
+      value: 1
+    text: "\uCC3D\uBB38\uC744 \uC5F4\uC5C8\uB2E4. \uC544\uBB34\uB3C4 \uC5C6\uC5C8\uB2E4.
+      \uCC3D\uD2C0\uC5D0 \uB178\uB780 \uC2E4\uC774 \uAC78\uB824 \uC788\uC5C8\uB2E4."
+  - conditions:
+    - key: day
+      comparison: 3
+      value: 3
+    text: "\u2014 \uC14B\uC9F8 \uB0A0 \u2014"
+  emptyText: "(\uC544\uC9C1 \uC544\uBB34\uAC83\uB3C4 \uC801\uD600 \uC788\uC9C0 \uC54A\uB2E4)"
+  compact: 1

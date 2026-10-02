@@ -27,3 +27,5 @@ MonoBehaviour:
     comparison: 0
     value: 1
   advancePrompt: 
+  spawnOnEnter: home_bed
+  onEnter: []

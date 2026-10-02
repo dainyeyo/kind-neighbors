@@ -16,5 +16,22 @@ MonoBehaviour:
     day: 1
     time: 2
   lighting: {fileID: 11400000, guid: dc191db8e70581449b658d2f9a571de8, type: 2}
-  completeWhen: []
+  completeWhen:
+  - key: event.d1_silhouette
+    comparison: 0
+    value: 1
   advancePrompt: "\uC7A0\uC790\uAE30"
+  spawnOnEnter: home_inside_door
+  onEnter:
+  - key: curtain.closed
+    operation: 0
+    value: 0
+  - key: lamp.off
+    operation: 0
+    value: 0
+  - key: door.locked
+    operation: 0
+    value: 0
+  - key: home.d1
+    operation: 0
+    value: 1

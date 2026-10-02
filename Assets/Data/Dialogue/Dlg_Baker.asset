@@ -41,14 +41,25 @@ MonoBehaviour:
     speaker: 
     text: "\uC5B4\uBA38, \uB124\uAC00 \uC0C8\uB85C \uC628 \uBC30\uB2EC\uC6D0 {player}\uAD6C\uB098!
       \uB9C8\uCE68 \uC798 \uC654\uC5B4~"
-    nextId: ask
+    nextId: bag
     choices: []
     effects: []
     actions: []
+  - id: bag
+    speaker: 
+    text: "\uC790, \uC774 \uAC00\uBC29\uBD80\uD130 \uBC1B\uC73C\uB834. \uC804 \uBC30\uB2EC\uC6D0\uC774
+      \uC4F0\uB358 \uAC70\uC57C. \uC544\uC9C1 \uD2BC\uD2BC\uD574~"
+    nextId: ask
+    choices: []
+    effects:
+    - key: has.bag
+      operation: 0
+      value: 1
+    actions: []
   - id: ask
     speaker: 
-    text: "\uC774 \uBE75 \uBC14\uAD6C\uB2C8, \uC774\uC6C3 \uD560\uBA38\uB2C8\uB124
-      \uC6B0\uD3B8\uD568\uC5D0 \uC880 \uB123\uC5B4 \uC904\uB798?"
+    text: "\uADF8\uB7FC \uCCAB \uBC30\uB2EC! \uC774 \uBE75 \uBC14\uAD6C\uB2C8, \uC774\uC6C3
+      \uD560\uBA38\uB2C8\uB124 \uC6B0\uD3B8\uD568\uC5D0 \uC880 \uB123\uC5B4 \uC904\uB798?"
     nextId: 
     choices:
     - text: "\uB124, \uB2E4\uB140\uC62C\uAC8C\uC694"
@@ -116,17 +127,31 @@ MonoBehaviour:
     text: "\uC5B4\uBA38, \uC6B0\uB9AC \uAC00\uAC8C\uB124! \uC774\uAC74 \uB098, \uC774\uAC74
       \uD560\uBA38\uB2C8, \uC774\uAC74 \uC544\uC774\u2026 \uADF8\uB9AC\uACE0 \uC774
       \uAE38\uCB49\uD55C \uAC74 \uB204\uAD74\uAE4C~?"
-    nextId: letter_end
+    nextId: letter_gift
     choices: []
     effects: []
     actions: []
+  - id: letter_gift
+    speaker: 
+    text: "\uD6C4\uD6C4, \uC798 \uADF8\uB838\uB124. \uC774 \uADF8\uB9BC\uC740 \uB124\uAC00
+      \uAC00\uC9C0\uB834~ \uC9D1\uC5D0 \uAC78\uC5B4 \uB450\uBA74 \uC88B\uACA0\uB2E4."
+    nextId: letter_end
+    choices: []
+    effects:
+    - key: gift.drawing
+      operation: 0
+      value: 1
+    actions: []
   - id: letter_end
     speaker: 
-    text: "\uD6C4\uD6C4, \uC798 \uADF8\uB838\uB124. \uC624\uB298 \uC815\uB9D0 \uC218\uACE0
-      \uB9CE\uC558\uC5B4, {player}."
+    text: "\uC624\uB298 \uC815\uB9D0 \uC218\uACE0 \uB9CE\uC558\uC5B4, {player}. \uC774\uAC74
+      \uC624\uB298 \uC77C\uB2F9 \uB300\uC2E0\uC774\uC57C~ \uAC13 \uAD6C\uC6B4 \uBE75!"
     nextId: rule1_again
     choices: []
-    effects: []
+    effects:
+    - key: gift.bread
+      operation: 0
+      value: 1
     actions: []
   - id: rule1_again
     speaker: 

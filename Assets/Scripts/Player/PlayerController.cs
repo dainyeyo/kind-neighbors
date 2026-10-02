@@ -35,15 +35,18 @@ namespace KindNeighbors.Player
         [SerializeField] ViewMode viewMode = ViewMode.ThirdPerson;
         [SerializeField] KeyCode toggleViewKey = KeyCode.V;
         [SerializeField] float thirdPersonDistance = 4f;
+        [SerializeField] float shoulderOffset = 0.6f;
         [SerializeField] float cameraCollisionRadius = 0.2f;
         [SerializeField] LayerMask cameraCollisionMask = ~(1 << 2); // Ignore Raycast 레이어(플레이어) 제외
+        [SerializeField] float hideBodyDistance = 1.2f;
 
         CharacterController controller;
         Renderer[] bodyRenderers;
         float yaw;
         float pitch;
         float verticalVelocity;
-        bool inputLocked;
+        bool bodyHidden;
+        int lockCount;
         int unlockFrame = -1;
 
         public ViewMode ViewMode => viewMode;
@@ -54,7 +57,7 @@ namespace KindNeighbors.Player
         /// 이동/시점/상호작용 입력을 받을 수 있는가.
         /// 잠금이 풀린 프레임에는 아직 false라서, 대화를 끝낸 E 키가 같은 프레임에 다시 상호작용하지 않는다.
         /// </summary>
-        public bool InputEnabled => !inputLocked && Time.frameCount > unlockFrame;
+        public bool InputEnabled => lockCount == 0 && Time.frameCount > unlockFrame;
 
         void Awake()
         {
@@ -75,11 +78,27 @@ namespace KindNeighbors.Player
                 inputLockRequested.Raised -= SetInputLocked;
         }
 
+        /// <summary>
+        /// 잠금 요청은 겹칠 수 있으므로(예: 화면 전환 중 대화) 개수로 센다. true와 false는 반드시 짝을 이뤄야 한다.
+        /// </summary>
         public void SetInputLocked(bool locked)
         {
-            inputLocked = locked;
-            if (!locked)
+            lockCount = Mathf.Max(0, lockCount + (locked ? 1 : -1));
+            if (lockCount == 0)
                 unlockFrame = Time.frameCount;
+        }
+
+        /// <summary>순간이동 (집 안팎 전환). CharacterController가 켜져 있으면 위치 지정이 무시되므로 잠시 끈다.</summary>
+        public void TeleportTo(Vector3 position, float facingYaw)
+        {
+            controller.enabled = false;
+            transform.position = position;
+            controller.enabled = true;
+
+            yaw = facingYaw;
+            pitch = 0f;
+            verticalVelocity = 0f;
+            body.rotation = Quaternion.Euler(0f, yaw, 0f);
         }
 
         void Start()
@@ -113,10 +132,15 @@ namespace KindNeighbors.Player
             ApplyViewMode();
         }
 
-        void ApplyViewMode()
+        void ApplyViewMode() => SetBodyHidden(viewMode == ViewMode.FirstPerson);
+
+        /// <summary>몸을 숨겨도 그림자는 남긴다 (규칙 위반 시 그림자 연출용).</summary>
+        void SetBodyHidden(bool hidden)
         {
-            // 1인칭에서는 몸이 안 보이게 하되 그림자는 남긴다 (규칙 위반 시 그림자 연출용)
-            var shadowMode = viewMode == ViewMode.FirstPerson ? ShadowCastingMode.ShadowsOnly : ShadowCastingMode.On;
+            if (bodyHidden == hidden)
+                return;
+            bodyHidden = hidden;
+            var shadowMode = hidden ? ShadowCastingMode.ShadowsOnly : ShadowCastingMode.On;
             foreach (var r in bodyRenderers)
                 r.shadowCastingMode = shadowMode;
         }
@@ -158,12 +182,20 @@ namespace KindNeighbors.Player
                 return;
             }
 
-            float distance = thirdPersonDistance;
-            if (Physics.SphereCast(cameraPivot.position, cameraCollisionRadius, -cameraPivot.forward, out RaycastHit hit,
-                    thirdPersonDistance, cameraCollisionMask, QueryTriggerInteraction.Ignore))
-                distance = hit.distance;
+            // 어깨 너머 시점: 카메라를 옆으로 비켜 두어 화면 가운데(창문, NPC)를 몸이 가리지 않게 한다
+            Vector3 desiredLocal = new(shoulderOffset, 0f, -thirdPersonDistance);
+            Vector3 desired = cameraPivot.TransformPoint(desiredLocal);
+            Vector3 toDesired = desired - cameraPivot.position;
+            float fraction = 1f;
+            if (Physics.SphereCast(cameraPivot.position, cameraCollisionRadius, toDesired.normalized, out RaycastHit hit,
+                    toDesired.magnitude, cameraCollisionMask, QueryTriggerInteraction.Ignore))
+                fraction = hit.distance / toDesired.magnitude;
 
-            playerCamera.transform.localPosition = new Vector3(0f, 0f, -distance);
+            playerCamera.transform.localPosition = desiredLocal * fraction;
+            float distance = thirdPersonDistance * fraction;
+
+            // 좁은 집 안처럼 벽에 밀려 카메라가 몸에 붙으면 몸이 화면을 가리므로 숨긴다
+            SetBodyHidden(distance < hideBodyDistance);
         }
 
         void HandleCursor()

@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77503d03735368d49b7c838fe4c3125c, type: 3}
+  m_Name: Doc_Newsletter
+  m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Home.DocumentAsset
+  title: "\uC232\uAC00 \uB9C8\uC744 \uC18C\uC2DD"
+  paragraphs:
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    text: "\uC0C8 \uBC30\uB2EC\uC6D0\uC744 \uD658\uC601\uD574\uC694! \uC774\uB984\uC740
+      {player}\uB798\uC694. \uB9C8\uC8FC\uCE58\uBA74 \uBC18\uAC11\uAC8C \uC778\uC0AC\uD574
+      \uC8FC\uC138\uC694~"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    text: "\uBE75\uC9D1 \uC774\uBC88 \uC8FC \uCD94\uCC9C: \uD638\uB450\uBE75. \uAC13
+      \uAD6C\uC6B4 \uAC74 \uC624\uC804\uC5D0\uB9CC!"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    text: "\uD574 \uC9C0\uAE30 \uC804 \uADC0\uAC00\uB294 \uC6B0\uB9AC \uBAA8\uB450\uC758
+      \uC57D\uC18D! \uB2A6\uC73C\uBA74 \uB2E4\uB4E4 \uAC71\uC815\uD574\uC694~"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 2
+    text: "\uC232 \uACBD\uACC4 \uB3C4\uC2DC\uB77D \uB2F9\uBC88: \uC774\uBC88 \uC8FC\uB3C4
+      \uBC30\uB2EC\uC6D0\uC774 \uC218\uACE0\uD574 \uC904 \uAC70\uC608\uC694~"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 2
+    text: "\uBC24\uC5D0 \uCC3D\uBB38\uC774 \uB35C\uCEF9\uAC70\uB824\uB3C4 \uAC71\uC815
+      \uB9C8\uC138\uC694. \uBC14\uB78C\uC774\uC5D0\uC694! \uBC14\uB78C\uC740 \uCC3D\uBB38\uC744
+      \uC5F4\uC5B4 \uB2EC\uB77C\uACE0 \uD558\uC9C0 \uC54A\uC73C\uB2C8\uAE4C\uC694~"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 2
+    text: "\uD560\uBA38\uB2C8\uB124 \uD138\uC2E4 \uB098\uB214: \uB178\uB780\uC0C9\uC740
+      \uB2E4 \uB5A8\uC5B4\uC84C\uB300\uC694."
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 3
+    text: "\uC19C\uC774\uC758 \uB178\uB780 \uBAA9\uB3C4\uB9AC\uB97C \uBCF4\uC2E0
+      \uBD84\uC740 \uADF8\uB0E5 \uB450\uC138\uC694~ \uC19C\uC774\uAC00 \uC544\uC9C1
+      \uC4F0\uACE0 \uC788\uB300\uC694."
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 3
+    text: "\uC624\uB298\uB3C4 \uC232 \uACBD\uACC4 \uB3C4\uC2DC\uB77D \uBC30\uB2EC\uC774
+      \uC788\uC5B4\uC694. \uB193\uACE0\uB9CC \uC624\uBA74 \uB3FC\uC694~"
+  emptyText: "(\uC624\uB298\uC740 \uC18C\uC2DD\uC9C0\uAC00 \uC624\uC9C0 \uC54A\uC558\uB2E4)"

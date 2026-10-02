@@ -4,8 +4,12 @@ using KindNeighbors.Dialogue;
 using KindNeighbors.Flow;
 using KindNeighbors.Interaction;
 using KindNeighbors.Player;
+using KindNeighbors.Core.Flags;
+using KindNeighbors.Home;
 using KindNeighbors.Save;
+using KindNeighbors.Travel;
 using KindNeighbors.UI;
+using KindNeighbors.World;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -16,7 +20,7 @@ namespace KindNeighbors.EditorTools
     /// 프로토타입 회색 박스 씬을 생성한다. 다시 실행하면 씬을 처음부터 새로 만든다 (데이터 에셋은 유지).
     /// 맵 에셋이 정해지면 각 Greybox 오브젝트를 실제 모델로 교체하면 된다.
     /// </summary>
-    public static class PrototypeSceneBuilder
+    public static partial class PrototypeSceneBuilder
     {
         const string ScenePath = "Assets/Scenes/Prototype.unity";
         const string MaterialFolder = "Assets/Materials/Greybox";
@@ -52,6 +56,7 @@ namespace KindNeighbors.EditorTools
             SetRef(flow, "flags", data.flags);
             SetRef(flow, "phaseChanged", data.phaseChanged);
             SetRef(flow, "advanceRequested", data.advanceRequested);
+            SetRef(flow, "travelRequested", data.travelRequested);
 
             var lighting = systems.AddComponent<LightingController>();
             SetRef(lighting, "phaseChanged", data.phaseChanged);
@@ -91,11 +96,20 @@ namespace KindNeighbors.EditorTools
 
             CreateMailbox(mailboxSpot, deliveryManager, PrototypeData.GrandmaMailbox);
 
+            // 플레이어 집 바깥: 문(저녁 → 밤으로 넘기기 / 낮에 들어가기), 우편함(소식지)
             var homeDoor = playerDoor.AddComponent<PhaseAdvanceTrigger>();
             SetRef(homeDoor, "flow", flow);
             SetRef(homeDoor, "advanceRequested", data.advanceRequested);
+            SetRef(homeDoor, "flags", data.flags);
+            SetConditions(homeDoor, "conditions", PrototypeData.TimeIsNot(TimeOfDay.Night));
+            AddTravel(playerDoor, "집에 들어가기", PrototypeData.SpawnInsideDoor, data, PrototypeData.TimeIs(TimeOfDay.Morning));
+            CreateSpawnPoint(PrototypeData.SpawnOutsideDoor, null, new Vector3(0f, 0f, -14.3f), 0f);
+            CreateHomeMailbox(new Vector3(1.9f, 0f, -14.9f), data);
 
-            PlayerController player = CreatePlayer(new Vector3(0f, 0f, -8f), data, out PlayerInteractor interactor);
+            CreateVillageProps(map, data);
+            Vector3 bedSpawn = BuildHome(data, flow);
+
+            PlayerController player = CreatePlayer(bedSpawn, data, out PlayerInteractor interactor);
 
             var hud = systems.AddComponent<PrototypeHUD>();
             SetRef(hud, "player", player);
@@ -103,6 +117,18 @@ namespace KindNeighbors.EditorTools
             SetRef(hud, "phaseChanged", data.phaseChanged);
             SetRef(hud, "orderAccepted", data.orderAccepted);
             SetRef(hud, "orderCompleted", data.orderCompleted);
+            SetRef(hud, "subtitle", data.subtitle);
+
+            var reader = systems.AddComponent<ReaderUI>();
+            SetRef(reader, "documentRequested", data.documentRequested);
+            SetRef(reader, "inputLock", data.inputLock);
+
+            var fader = systems.AddComponent<ScreenFader>();
+            var travel = systems.AddComponent<TravelSystem>();
+            SetRef(travel, "travelRequested", data.travelRequested);
+            SetRef(travel, "inputLock", data.inputLock);
+            SetRef(travel, "player", player);
+            SetRef(travel, "fader", fader);
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             SetBuildScenes(ScenePath);

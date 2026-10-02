@@ -2,6 +2,7 @@ using KindNeighbors.Core;
 using KindNeighbors.Core.Events;
 using KindNeighbors.Core.Flags;
 using KindNeighbors.Save;
+using KindNeighbors.Travel;
 using UnityEngine;
 
 namespace KindNeighbors.Flow
@@ -16,6 +17,7 @@ namespace KindNeighbors.Flow
         [SerializeField] GameFlags flags;
         [SerializeField] PhaseEventChannel phaseChanged;
         [SerializeField] VoidEventChannel advanceRequested;
+        [SerializeField] TravelEventChannel travelRequested;
         [SerializeField] bool loadSaveOnStart = true;
         [Tooltip("플레이어 이름이 정해질 때까지 첫 시간대를 시작하지 않는다 (이름 입력 화면)")]
         [SerializeField] bool requirePlayerName = true;
@@ -90,6 +92,10 @@ namespace KindNeighbors.Flow
             phaseIndex = index;
             PhaseDefinition definition = config.phases[index];
             machine.ChangeState(new PhaseState(definition, flags, phaseChanged, Advance));
+
+            // 조명이 이미 바뀌었으므로 곧바로 화면을 가리고 옮긴다
+            if (!string.IsNullOrEmpty(definition.spawnOnEnter))
+                travelRequested.Raise(new TravelRequest(definition.spawnOnEnter, true));
 
             if (definition.phase.time == TimeOfDay.Morning)
                 SaveSystem.Save(SaveData.Capture(definition.phase, flags));

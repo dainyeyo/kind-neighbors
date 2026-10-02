@@ -10,8 +10,10 @@ namespace KindNeighbors.Dialogue
         [SerializeField] DialogueGraph graph;
         [SerializeField] GameFlags flags;
         [SerializeField] DialogueGraphEventChannel dialogueRequested;
+        [Tooltip("비어 있으면 \"{speakerName}에게 말 걸기\". 사람이 아닌 대상(창문 등)에 쓴다.")]
+        [SerializeField] string promptOverride;
 
-        public string Prompt => $"{graph.speakerName}에게 말 걸기";
+        public string Prompt => string.IsNullOrEmpty(promptOverride) ? $"{graph.speakerName}에게 말 걸기" : promptOverride;
 
         public bool CanInteract(PlayerInteractor interactor) => graph.FindStartNode(flags) != null;
 

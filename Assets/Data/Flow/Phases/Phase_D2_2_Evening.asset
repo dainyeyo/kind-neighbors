@@ -18,3 +18,5 @@ MonoBehaviour:
   lighting: {fileID: 11400000, guid: 7461af343c1a2a6478d5a2216724b4bf, type: 2}
   completeWhen: []
   advancePrompt: "\uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uAE30"
+  spawnOnEnter: 
+  onEnter: []
