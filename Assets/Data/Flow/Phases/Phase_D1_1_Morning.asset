@@ -28,4 +28,7 @@ MonoBehaviour:
     value: 1
   advancePrompt: 
   spawnOnEnter: home_bed
-  onEnter: []
+  onEnter:
+  - key: at.outskirts
+    operation: 0
+    value: 1

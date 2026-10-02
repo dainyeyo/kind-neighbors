@@ -72,8 +72,8 @@ MonoBehaviour:
   - id: ask_hat
     speaker: 
     text: "\uADF8 \uAE40\uC5D0 \uC774 \uD138\uBAA8\uC790 \uC880 \uC544\uC774\uD55C\uD14C
-      \uAC16\uB2E4\uC8FC\uACA0\uB2C8? \uBD81\uCABD \uAE38\uC5D0\uC11C \uB180\uACE0
-      \uC788\uC744 \uAC8C\uB2E4."
+      \uAC16\uB2E4\uC8FC\uACA0\uB2C8? \uC6B0\uCCB4\uAD6D \uB4A4 \uBD81\uCABD \uACF5\uD130\uC5D0\uC11C
+      \uB180\uACE0 \uC788\uC744 \uAC8C\uB2E4."
     nextId: 
     choices:
     - text: "\uB124, \uAC16\uB2E4\uC904\uAC8C\uC694"
@@ -103,8 +103,8 @@ MonoBehaviour:
     actions: []
   - id: hat_remind
     speaker: 
-    text: "\uC544\uC774\uB294 \uBD81\uCABD \uAE38\uC5D0 \uC788\uC744 \uAC8C\uB2E4.
-      \uBD88 \uAEBC\uC9C4 \uC9D1 \uADFC\uCC98 \uB9D0\uC774\uC57C~"
+    text: "\uC544\uC774\uB294 \uC6B0\uCCB4\uAD6D \uB4A4 \uBD81\uCABD \uACF5\uD130\uC5D0
+      \uC788\uC744 \uAC8C\uB2E4~"
     nextId: 
     choices: []
     effects: []

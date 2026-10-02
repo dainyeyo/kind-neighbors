@@ -19,4 +19,7 @@ MonoBehaviour:
   completeWhen: []
   advancePrompt: "(\uC784\uC2DC) \uC800\uB141\uAE4C\uC9C0 \uC77C\uD558\uAE30"
   spawnOnEnter: home_bed
-  onEnter: []
+  onEnter:
+  - key: at.outskirts
+    operation: 0
+    value: 1

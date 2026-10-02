@@ -43,10 +43,6 @@ namespace KindNeighbors.EditorTools
             PrototypeData data = PrototypeData.LoadOrCreate();
 
             Light sun = CreateLighting();
-            Transform map = new GameObject("Map").transform;
-            CreateGround(map);
-            CreateBuildings(map, out Transform bakeryNpcSpot, out Transform grandmaNpcSpot, out Transform mailboxSpot, out GameObject playerDoor);
-            CreateForestEdge(map);
 
             // 시스템: 서로 직접 참조하지 않고 데이터 에셋(플래그, 이벤트 채널)만 공유한다
             var systems = new GameObject("Systems");
@@ -79,43 +75,24 @@ namespace KindNeighbors.EditorTools
             SetRef(nameEntry, "flags", data.flags);
             SetRef(nameEntry, "inputLockRequested", data.inputLock);
 
-            // 낮 NPC: 밤과 프롤로그에는 없다. 직접 배달받는 NPC는 머리 위에 목적지 마커가 뜬다.
-            // 빵집 주인과 동료들은 빵집 안에 있다 (BuildBakery).
-            Transform npcs = new GameObject("NPCs_Daytime").transform;
-            CreateNpc("NPC_Grandma", npcs, grandmaNpcSpot.position, grandmaNpcSpot.rotation, 1.2f, 0.75f,
-                "NpcGrandma", new Color(0.65f, 0.55f, 0.75f), data.grandmaDialogue, data, deliveryManager, null);
-            // 아이: 불 꺼진 솜의 집 앞 북쪽 길에서 논다. 털모자를 전하러 가는 길에 솜의 집을 지나치게 된다.
-            CreateNpc("NPC_Child", npcs, new Vector3(3.2f, 0f, 12f), Quaternion.Euler(0f, 200f, 0f), 0.95f, 0.6f,
-                "NpcChild", new Color(0.55f, 0.75f, 0.95f), data.childDialogue, data, deliveryManager, PrototypeData.ChildSpot);
-
-            var npcSet = new GameObject("PhaseSet_DaytimeNPCs").AddComponent<PhaseObjectSet>();
-            SetRef(npcSet, "phaseChanged", data.phaseChanged);
-            SetArray(npcSet, "targets", npcs.gameObject);
-            SetEnumArray(npcSet, "activeTimes", (int)TimeOfDay.Morning, (int)TimeOfDay.Evening);
-            SetInt(npcSet, "fromDay", 1);
-
-            // 빵집 문: 낮과 저녁에만 연다 (프롤로그엔 닫혀 있다)
-            GameObject bakeryDoor = bakeryNpcSpot.parent.Find("Door").gameObject;
-            AddTravel(bakeryDoor, "빵집에 들어가기", PrototypeData.SpawnBakeryInside, data,
+            // 마을: 광장 중심. 빵집 문으로 빵집 내부에 들어간다 (낮과 저녁에만).
+            Transform bakery = BuildVillage(data, deliveryManager, out Transform grandmaNpcSpot, out Transform mailboxSpot);
+            AddTravel(bakery.Find("Door").gameObject, "빵집에 들어가기", PrototypeData.SpawnBakeryInside, data,
                 PrototypeData.TimeIsNot(TimeOfDay.Night), PrototypeData.DayAtLeast(1));
-            CreateSpawnPoint(PrototypeData.SpawnBakeryOutside, null, new Vector3(-12.1f, 0f, 0f), 90f);
-
+            CreateSpawnPoint(PrototypeData.SpawnBakeryOutside, null, bakery.TransformPoint(new Vector3(0f, 0f, 4.3f)), bakery.eulerAngles.y);
             CreateMailbox(mailboxSpot, deliveryManager, PrototypeData.GrandmaMailbox);
 
-            // 플레이어 집 바깥: 문(저녁 → 밤으로 넘기기 / 낮에 들어가기), 우편함(소식지)
+            // 외곽 종점: 숙소 문(저녁 → 밤으로 넘기기 / 낮에 들어가기)
+            GameObject playerDoor = BuildOutskirts(data, deliveryManager);
             var homeDoor = playerDoor.AddComponent<PhaseAdvanceTrigger>();
             SetRef(homeDoor, "flow", flow);
             SetRef(homeDoor, "advanceRequested", data.advanceRequested);
             SetRef(homeDoor, "flags", data.flags);
             SetConditions(homeDoor, "conditions", PrototypeData.TimeIsNot(TimeOfDay.Night));
             AddTravel(playerDoor, "집에 들어가기", PrototypeData.SpawnInsideDoor, data, PrototypeData.TimeIs(TimeOfDay.Morning));
-            CreateSpawnPoint(PrototypeData.SpawnOutsideDoor, null, new Vector3(0f, 0f, -14.3f), 0f);
-            CreateHomeMailbox(new Vector3(1.9f, 0f, -14.9f), data);
 
-            CreateVillageProps(map, data);
             Vector3 bedSpawn = BuildHome(data, flow);
             BuildBakery(data, deliveryManager);
-            BuildPrologue(map, data, deliveryManager);
 
             PlayerController player = CreatePlayer(bedSpawn, data, out PlayerInteractor interactor);
 
@@ -169,70 +146,6 @@ namespace KindNeighbors.EditorTools
             RenderSettings.ambientEquatorColor = new Color(0.5f, 0.5f, 0.47f);
             RenderSettings.ambientGroundColor = new Color(0.3f, 0.28f, 0.25f);
             return sun;
-        }
-
-        static void CreateGround(Transform map)
-        {
-            Box("Ground", map, new Vector3(0f, -0.5f, 5f), new Vector3(80f, 1f, 80f), "Grass", new Color(0.55f, 0.72f, 0.45f));
-
-            // 광장 + 길
-            var plaza = Prim(PrimitiveType.Cylinder, "Plaza", map, new Vector3(0f, 0.01f, 0f), new Vector3(12f, 0.02f, 12f), "Path", new Color(0.72f, 0.64f, 0.5f));
-            Object.DestroyImmediate(plaza.GetComponent<Collider>());
-            Box("Road_North", map, new Vector3(0f, 0.01f, 16f), new Vector3(3f, 0.02f, 24f), "Path", default);
-            Box("Road_West", map, new Vector3(-12f, 0.01f, 0f), new Vector3(14f, 0.02f, 3f), "Path", default);
-            Box("Road_East", map, new Vector3(12f, 0.01f, 0f), new Vector3(14f, 0.02f, 3f), "Path", default);
-            Box("Road_South", map, new Vector3(0f, 0.01f, -10f), new Vector3(3f, 0.02f, 10f), "Path", default);
-        }
-
-        static void CreateBuildings(Transform map, out Transform bakeryNpcSpot, out Transform grandmaNpcSpot, out Transform mailboxSpot, out GameObject playerDoor)
-        {
-            Transform buildings = new GameObject("Buildings").transform;
-            buildings.SetParent(map);
-
-            // 빵집 (서쪽, 광장을 향함)
-            Transform bakery = House("Bakery", buildings, new Vector3(-16f, 0f, 0f), 90f, new Vector3(7f, 4f, 6f),
-                "Bakery", new Color(0.95f, 0.78f, 0.6f));
-            bakeryNpcSpot = Spot("NpcSpot", bakery, new Vector3(0f, 0f, 4.2f));
-
-            // 이웃 할머니 집 (동쪽)
-            Transform grandma = House("House_Grandma", buildings, new Vector3(16f, 0f, 0f), -90f, new Vector3(6f, 3.5f, 5f),
-                "HouseGrandma", new Color(0.8f, 0.7f, 0.9f));
-            mailboxSpot = Spot("MailboxSpot", grandma, new Vector3(1.8f, 0f, 3.8f));
-            grandmaNpcSpot = Spot("NpcSpot", grandma, new Vector3(-1.6f, 0f, 3.4f));
-
-            // 솜의 집 (불 꺼진 집, 북동쪽)
-            House("House_Som (Dark)", buildings, new Vector3(9f, 0f, 14f), -90f, new Vector3(5f, 3.5f, 5f),
-                "HouseSom", new Color(0.35f, 0.33f, 0.35f), lightsOn: false);
-
-            // 그 외 주민 집
-            House("House_A", buildings, new Vector3(-8f, 0f, 14f), 90f, new Vector3(5f, 3.5f, 5f), "HouseA", new Color(0.7f, 0.85f, 0.95f));
-            House("House_B", buildings, new Vector3(-8f, 0f, -12f), 90f, new Vector3(5f, 3.5f, 5f), "HouseB", new Color(0.95f, 0.85f, 0.7f));
-            House("House_C", buildings, new Vector3(9f, 0f, -12f), -90f, new Vector3(5f, 3.5f, 5f), "HouseC", new Color(0.75f, 0.92f, 0.78f));
-
-            // 플레이어 집 (남쪽 끝) — 문으로 시간대를 넘긴다 (집에 들어가기, 잠자기)
-            Transform home = House("House_Player", buildings, new Vector3(0f, 0f, -18f), 0f, new Vector3(5f, 3.5f, 5f), "HousePlayer", new Color(0.95f, 0.95f, 0.88f));
-            playerDoor = home.Find("Door").gameObject;
-        }
-
-        static void CreateForestEdge(Transform map)
-        {
-            Transform forest = new GameObject("ForestEdge").transform;
-            forest.SetParent(map);
-            var rng = new System.Random(7);
-            for (int i = 0; i < 26; i++)
-            {
-                float x = -36f + i * 2.9f + (float)rng.NextDouble();
-                float z = 32f + (float)rng.NextDouble() * 6f;
-                float height = 4f + (float)rng.NextDouble() * 3f;
-                Transform tree = new GameObject($"Tree_{i:00}").transform;
-                tree.SetParent(forest);
-                tree.position = new Vector3(x, 0f, z);
-                Prim(PrimitiveType.Cylinder, "Trunk", tree, new Vector3(x, height * 0.25f, z), new Vector3(0.5f, height * 0.25f, 0.5f), "Trunk", new Color(0.45f, 0.33f, 0.24f));
-                Prim(PrimitiveType.Sphere, "Leaves", tree, new Vector3(x, height * 0.65f, z), Vector3.one * (2.2f + (float)rng.NextDouble()), "Leaves", new Color(0.25f, 0.45f, 0.3f));
-            }
-
-            // 숲 경계 배달 지점 (DAY 3 특별 배달용 자리 표시)
-            Spot("ForestDropSpot", forest, new Vector3(0f, 0f, 30f));
         }
 
         // ---------- 상호작용 대상 ----------
@@ -329,6 +242,8 @@ namespace KindNeighbors.EditorTools
             var cam = camGo.AddComponent<Camera>();
             cam.nearClipPlane = 0.05f;
             cam.fieldOfView = 65f;
+            // 마을·외곽·집·빵집은 수백 m씩 떨어진 별도 공간이다. 다른 공간이 지평선에 보이지 않게 한다.
+            cam.farClipPlane = 150f;
             camGo.AddComponent<AudioListener>();
 
             var controller = root.AddComponent<PlayerController>();
@@ -395,7 +310,40 @@ namespace KindNeighbors.EditorTools
             return go;
         }
 
-        /// <summary>같은 키는 같은 머티리얼을 재사용한다. color가 default면 이미 만든 머티리얼을 그대로 쓴다.</summary>
+        /// <summary>
+        /// 여러 곳에서 색 없이(default) 쓰는 머티리얼의 기본색. 빌드 순서에 따라 흰색으로 만들어지는 것을 막는다.
+        /// </summary>
+        static readonly Dictionary<string, Color> Palette = new()
+        {
+            ["Grass"] = new Color(0.55f, 0.72f, 0.45f),
+            ["Path"] = new Color(0.72f, 0.64f, 0.5f),
+            ["Trunk"] = new Color(0.45f, 0.33f, 0.24f),
+            ["Leaves"] = new Color(0.25f, 0.45f, 0.3f),
+            ["Roof"] = new Color(0.55f, 0.35f, 0.3f),
+            ["Door"] = new Color(0.5f, 0.35f, 0.22f),
+            ["Window"] = new Color(0.95f, 0.9f, 0.6f),
+            ["WindowDark"] = new Color(0.12f, 0.12f, 0.14f),
+            ["Face"] = new Color(0.2f, 0.15f, 0.15f),
+            ["Desk"] = new Color(0.63f, 0.48f, 0.35f),
+            ["Paper"] = new Color(0.97f, 0.96f, 0.9f),
+            ["Cork"] = new Color(0.7f, 0.55f, 0.38f),
+            ["Ball"] = new Color(0.9f, 0.3f, 0.3f),
+            ["LampPole"] = new Color(0.2f, 0.2f, 0.22f),
+            ["LampShade"] = new Color(1f, 0.92f, 0.7f),
+            ["Shelter"] = new Color(0.85f, 0.88f, 0.82f),
+            ["Stone"] = new Color(0.72f, 0.7f, 0.66f),
+            ["Shutter"] = new Color(0.45f, 0.4f, 0.36f),
+            ["HouseA"] = new Color(0.7f, 0.85f, 0.95f),
+            ["HouseB"] = new Color(0.95f, 0.85f, 0.7f),
+            ["HouseC"] = new Color(0.75f, 0.92f, 0.78f),
+            ["NpcBakery"] = new Color(0.9f, 0.55f, 0.4f),
+            ["GiftBread"] = new Color(0.85f, 0.65f, 0.35f),
+            ["MailboxHome"] = new Color(0.3f, 0.5f, 0.8f),
+            ["ClothPink"] = new Color(0.95f, 0.7f, 0.75f),
+            ["YellowThread"] = new Color(1f, 0.85f, 0.15f),
+        };
+
+        /// <summary>같은 키는 같은 머티리얼을 재사용한다. color가 default면 이미 만든 머티리얼을 그대로 쓰고, 새로 만들 때는 Palette 색을 쓴다.</summary>
         static Material GetMaterial(string key, Color color)
         {
             if (materials.TryGetValue(key, out var cached))
@@ -407,6 +355,8 @@ namespace KindNeighbors.EditorTools
             {
                 mat = new Material(Shader.Find("Standard"));
                 AssetDatabase.CreateAsset(mat, path);
+                if (color == default && Palette.TryGetValue(key, out Color paletteColor))
+                    color = paletteColor;
             }
             if (color != default)
             {

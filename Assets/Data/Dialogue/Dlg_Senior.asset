@@ -106,8 +106,8 @@ MonoBehaviour:
     actions: []
   - id: evening
     speaker: 
-    text: "\uC624\uB298 \uC218\uACE0\uD588\uC5B4! \uD574 \uB5A8\uC5B4\uC9C0\uAE30
-      \uC804\uC5D0 \uC5BC\uB978 \uAC00~ \uC218\uCE59 1\uBC88!"
+    text: "\uC624\uB298 \uC218\uACE0\uD588\uC5B4! \uB9C9\uCC28 \uB193\uCE58\uC9C0
+      \uB9C8~ \uC218\uCE59 1\uBC88!"
     nextId: 
     choices: []
     effects: []

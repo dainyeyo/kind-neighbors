@@ -12,11 +12,17 @@ namespace KindNeighbors.Travel
         [SerializeField] GameFlags flags;
         [SerializeField] FlagCondition[] conditions;
         [SerializeField] TravelEventChannel travelRequested;
+        [Tooltip("이동할 때 적용 (예: 버스를 타면 지금 어느 지역에 있는지 기록)")]
+        [SerializeField] FlagEffect[] onTravel;
 
         public string Prompt => prompt;
 
         public bool CanInteract(PlayerInteractor interactor) => FlagCondition.All(conditions, flags);
 
-        public void Interact(PlayerInteractor interactor) => travelRequested.Raise(new TravelRequest(targetSpawnId, false));
+        public void Interact(PlayerInteractor interactor)
+        {
+            FlagEffect.ApplyAll(onTravel, flags);
+            travelRequested.Raise(new TravelRequest(targetSpawnId, false));
+        }
     }
 }

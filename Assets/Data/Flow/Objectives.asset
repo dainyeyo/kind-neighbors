@@ -26,8 +26,8 @@ MonoBehaviour:
     - key: day
       comparison: 0
       value: 0
-    text: "\uAD11\uC7A5 \uC9C0\uB098 \uB0A8\uCABD \uB05D \uD558\uC580 \uC9D1(\uC219\uC18C)\uC73C\uB85C
-      \uAC00\uAE30"
+    text: "\uC815\uB958\uC7A5 \uC55E \uD558\uC580 \uC9D1(\uC219\uC18C)\uC5D0 \uB4E4\uC5B4\uAC00
+      \uC26C\uAE30"
   - conditions:
     - key: time
       comparison: 0
@@ -40,7 +40,31 @@ MonoBehaviour:
     - key: settled.d1
       comparison: 0
       value: 1
-    text: "\uD574 \uC9C0\uAE30 \uC804\uC5D0 \uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uAE30"
+    - key: at.outskirts
+      comparison: 0
+      value: 1
+    text: "\uC219\uC18C\uC5D0 \uB4E4\uC5B4\uAC00\uAE30"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    - key: settled.d1
+      comparison: 0
+      value: 1
+    text: "\uAD11\uC7A5 \uC815\uB958\uC7A5\uC5D0\uC11C \uB9C9\uCC28 \uD0C0\uACE0
+      \uC219\uC18C\uB85C \uB3CC\uC544\uAC00\uAE30"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    - key: time
+      comparison: 0
+      value: 1
+    - key: at.outskirts
+      comparison: 0
+      value: 1
+    text: "\uBC84\uC2A4 \uD0C0\uACE0 \uB9C8\uC744\uB85C \uB3CC\uC544\uAC00 \uC815\uC0B0
+      \uBC1B\uAE30"
   - conditions:
     - key: day
       comparison: 0
@@ -49,6 +73,18 @@ MonoBehaviour:
       comparison: 0
       value: 1
     text: "\uBE75\uC9D1\uC73C\uB85C \uB3CC\uC544\uAC00 \uC815\uC0B0 \uBC1B\uAE30"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    - key: briefed.d1
+      comparison: 0
+      value: 0
+    - key: at.outskirts
+      comparison: 0
+      value: 1
+    text: "\uC815\uB958\uC7A5\uC5D0\uC11C \uBC84\uC2A4 \uD0C0\uACE0 \uB9C8\uC744\uB85C
+      \uCD9C\uADFC\uD558\uAE30"
   - conditions:
     - key: day
       comparison: 0
@@ -86,8 +122,8 @@ MonoBehaviour:
     - key: time
       comparison: 0
       value: 0
-    text: "(\uC784\uC2DC) \uB3D9\uB124\uB97C \uB3CC\uC544\uBCF8 \uB4A4 \uC9D1 \uBB38
-      \uC55E\uC5D0\uC11C \uD558\uB8E8 \uB118\uAE30\uAE30"
+    text: "(\uC784\uC2DC) \uB9C8\uC744\uC744 \uB3CC\uC544\uBCF8 \uB4A4 \uC219\uC18C
+      \uBB38 \uC55E\uC5D0\uC11C \uD558\uB8E8 \uB118\uAE30\uAE30"
   - conditions:
     - key: day
       comparison: 3
@@ -95,4 +131,15 @@ MonoBehaviour:
     - key: time
       comparison: 0
       value: 1
-    text: "\uD574 \uC9C0\uAE30 \uC804\uC5D0 \uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uAE30"
+    - key: at.outskirts
+      comparison: 0
+      value: 1
+    text: "\uC219\uC18C\uC5D0 \uB4E4\uC5B4\uAC00\uAE30"
+  - conditions:
+    - key: day
+      comparison: 3
+      value: 2
+    - key: time
+      comparison: 0
+      value: 1
+    text: "\uB9C9\uCC28 \uD0C0\uACE0 \uC219\uC18C\uB85C \uB3CC\uC544\uAC00\uAE30"

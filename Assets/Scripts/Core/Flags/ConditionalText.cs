@@ -21,6 +21,17 @@ namespace KindNeighbors.Core.Flags
             this.conditions = conditions;
         }
 
+        /// <summary>위에서부터 조건이 처음 맞는 한 줄. 없으면 빈 문자열.</summary>
+        public static string FirstMatch(IReadOnlyList<ConditionalText> lines, GameFlags flags)
+        {
+            if (lines == null)
+                return string.Empty;
+            foreach (var line in lines)
+                if (FlagCondition.All(line.conditions, flags))
+                    return TextFormatter.Format(line.text, flags);
+            return string.Empty;
+        }
+
         /// <summary>조건이 참인 문장만 순서대로 이어 붙인다. 하나도 없으면 빈 문자열.</summary>
         public static string Compose(IReadOnlyList<ConditionalText> lines, GameFlags flags, string separator = "\n")
         {

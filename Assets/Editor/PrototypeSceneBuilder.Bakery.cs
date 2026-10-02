@@ -84,40 +84,5 @@ namespace KindNeighbors.EditorTools
             PointLight("Light_Shop", shop, BakeryOrigin + new Vector3(-1.5f, 2.9f, 0.5f), new Color(1f, 0.88f, 0.7f), 1.1f, 9f, LightShadows.Soft);
             PointLight("Light_BreakRoom", shop, BakeryOrigin + new Vector3(3f, 2.9f, 1.5f), new Color(1f, 0.85f, 0.65f), 0.9f, 7f, LightShadows.None);
         }
-
-        /// <summary>
-        /// 프롤로그: 해 질 녘 북쪽 끝 버스 정류장. 남쪽 숙소까지 걸어가는 길에 불 꺼진 솜의 집을 지나친다.
-        /// 빵집 주인은 정류장에 마중 나와 있고, 이야기를 나누면 숙소 앞으로 먼저 가 있다.
-        /// </summary>
-        static void BuildPrologue(Transform map, PrototypeData data, DeliveryManager deliveryManager)
-        {
-            Transform stop = Group("BusStop", map);
-            // 플레이어는 남쪽을 보고 시작하고 어깨 카메라는 오른쪽(-x)에 있으므로, 정류장은 왼쪽(+x)에 둔다
-            BoxLocal("Shelter_Roof", stop, new Vector3(3f, 2.4f, 27.6f), new Vector3(2.6f, 0.1f, 1.3f), "Roof", default);
-            BoxLocal("Shelter_Back", stop, new Vector3(3f, 1.2f, 28.2f), new Vector3(2.6f, 2.4f, 0.08f), "LampPole", default);
-            BoxLocal("Shelter_Bench", stop, new Vector3(3f, 0.4f, 27.9f), new Vector3(2f, 0.1f, 0.45f), "Desk", default);
-            Prim(PrimitiveType.Cylinder, "Sign_Pole", stop, new Vector3(1.3f, 1.2f, 26.8f), new Vector3(0.08f, 1.2f, 0.08f), "LampPole", default);
-            NoCollider(Prim(PrimitiveType.Cylinder, "Sign", stop, new Vector3(1.3f, 2.45f, 26.8f), new Vector3(0.6f, 0.03f, 0.6f), "MailboxHome", default)).transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-            CreateSpawnPoint(PrototypeData.SpawnBusStop, stop, new Vector3(0f, 0f, 27f), 180f);
-
-            Transform npcs = Group("NPCs_Prologue", map);
-            CreateNpc("NPC_Baker_BusStop", npcs, new Vector3(0f, 0f, 25f), Quaternion.Euler(0f, 0f, 0f), 1.5f, 0.8f,
-                "NpcBakery", default, data.bakerBusStopDialogue, data, deliveryManager, null);
-            CreateNpc("NPC_Baker_Home", npcs, new Vector3(-1.6f, 0f, -14.2f), Quaternion.Euler(0f, 0f, 0f), 1.5f, 0.8f,
-                "NpcBakery", default, data.bakerHomeDialogue, data, deliveryManager, null);
-            Toggle("Toggle_BakerAtHome", npcs, data, npcs.Find("NPC_Baker_Home").gameObject, PrototypeData.Is(PrototypeData.MetBaker));
-
-            var prologueSet = PhaseSet("PhaseSet_Prologue", map, data, new[] { TimeOfDay.Evening }, npcs.gameObject);
-            SetInt(prologueSet, "fromDay", 0);
-            SetInt(prologueSet, "toDay", 0);
-
-            var busLeft = new GameObject("Subtitle_BusLeft").AddComponent<ConditionalSubtitle>();
-            busLeft.transform.SetParent(stop, false);
-            SetRef(busLeft, "flags", data.flags);
-            SetRef(busLeft, "subtitle", data.subtitle);
-            SetConditions(busLeft, "conditions", PrototypeData.DayIs(0), PrototypeData.Is(FlagKeys.HasName));
-            SetString(busLeft, "text", "막차가 떠났다. 손에는 전단 한 장과 편도 버스표.");
-            SetString(busLeft, "onceFlag", PrototypeData.PrologueSubtitleShown);
-        }
     }
 }

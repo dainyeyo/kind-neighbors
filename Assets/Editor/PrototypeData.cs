@@ -30,7 +30,10 @@ namespace KindNeighbors.EditorTools
         public const string SpawnBed = "home_bed";
         public const string SpawnInsideDoor = "home_inside_door";
         public const string SpawnOutsideDoor = "home_outside_door";
+        /// <summary>외곽 종점 정류장 (숙소 앞)</summary>
         public const string SpawnBusStop = "bus_stop";
+        /// <summary>마을 광장의 정류장</summary>
+        public const string SpawnVillageStop = "village_stop";
         public const string SpawnBakeryInside = "bakery_inside";
         public const string SpawnBakeryOutside = "bakery_outside";
 
@@ -51,6 +54,8 @@ namespace KindNeighbors.EditorTools
         public const string MetBaker = "met.baker";
         public const string Briefed = "briefed.d1";
         public const string PrologueSubtitleShown = "seen.prologue_bus";
+        /// <summary>1이면 외곽 종점(숙소 쪽), 0이면 마을. 버스를 탈 때와 시간대가 시작될 때 갱신된다.</summary>
+        public const string AtOutskirts = "at.outskirts";
         public static string CameHome(int day) => $"home.d{day}";
         public static string Settled(int day) => $"settled.d{day}";
 
@@ -75,7 +80,6 @@ namespace KindNeighbors.EditorTools
         public DialogueGraph childDialogue;
         public DialogueGraph windowDialogue;
         public DialogueGraph bakerBusStopDialogue;
-        public DialogueGraph bakerHomeDialogue;
         public DialogueGraph seniorDialogue;
         public DialogueGraph quietDialogue;
         public DocumentAsset newsletter;
@@ -116,7 +120,6 @@ namespace KindNeighbors.EditorTools
             d.childDialogue = CreateChildDialogue(d);
             d.windowDialogue = CreateWindowDialogue();
             d.bakerBusStopDialogue = CreateBakerBusStopDialogue();
-            d.bakerHomeDialogue = CreateBakerHomeDialogue();
             d.seniorDialogue = CreateSeniorDialogue();
             d.quietDialogue = CreateQuietDialogue();
             d.newsletter = CreateNewsletter();
@@ -193,6 +196,7 @@ namespace KindNeighbors.EditorTools
                     p.spawnOnEnter = SpawnBusStop;
                     p.completeWhen = new[] { Is(MetBaker) };
                     p.advancePrompt = "숙소에 들어가 쉬기";
+                    p.onEnter = new[] { new FlagEffect(AtOutskirts, FlagOperation.Set, 1) };
                 }),
             };
             for (int dayNumber = 1; dayNumber <= 3; dayNumber++)
@@ -202,7 +206,8 @@ namespace KindNeighbors.EditorTools
                 {
                     p.phase = new GamePhase(n, TimeOfDay.Morning);
                     p.lighting = day;
-                    p.spawnOnEnter = SpawnBed; // 매일 아침 집에서 일어난다
+                    p.spawnOnEnter = SpawnBed; // 매일 아침 집(외곽)에서 일어난다
+                    p.onEnter = new[] { new FlagEffect(AtOutskirts, FlagOperation.Set, 1) };
                     if (n == 1)
                     {
                         // 배달 3건을 모두 끝내면 자동으로 저녁이 된다
@@ -237,6 +242,7 @@ namespace KindNeighbors.EditorTools
                         new FlagEffect(FlagKeys.LampOff, FlagOperation.Set, 0),
                         new FlagEffect(FlagKeys.DoorLocked, FlagOperation.Set, 0),
                         new FlagEffect(CameHome(n), FlagOperation.Set, 1),
+                        new FlagEffect(AtOutskirts, FlagOperation.Set, 1),
                     };
                     // 그날 밤 이벤트가 끝나야 잠들 수 있다
                     if (n == 1)
@@ -288,9 +294,9 @@ namespace KindNeighbors.EditorTools
                     Choice("ask", "가방 받았구나! 잘 어울린다~ 그럼 첫 배달! 이 빵 바구니, 이웃 할머니네 우편함에 좀 넣어 줄래?",
                         ("네, 다녀올게요", "accept"),
                         ("지금은 좀…", "later")),
-                    Node("accept", "고마워~ 할머니 댁은 광장 건너 동쪽 길 끝이야.", null, actions: Do(giveBread)),
+                    Node("accept", "고마워~ 할머니 댁은 광장에서 찻집 옆 골목으로 들어가면 있어.", null, actions: Do(giveBread)),
                     Node("later", "그래그래, 천천히 해~ 빵은 식어도 맛있으니까!", null),
-                    Node("remind_bread", "할머니네 우편함에 넣어 주면 돼~ 광장 건너 동쪽 길 끝이야.", null),
+                    Node("remind_bread", "할머니네 우편함에 넣어 주면 돼~ 찻집 옆 동쪽 골목이야.", null),
                     Node("after_bread", "할머니가 좋아하셨지? 할머니도 너한테 부탁할 게 있다던데~", null),
 
                     Node("letter_receive", "응? 아이가 나한테 그림을?", "letter_look", actions: Do(takeLetter)),
@@ -301,8 +307,8 @@ namespace KindNeighbors.EditorTools
                     Node("settle", "오늘 정말 수고 많았어, {player}. 첫날인데 다 해냈네!", "settle2"),
                     Node("settle2", "이건 오늘 일당 대신이야~ 갓 구운 빵!", "rule1_again",
                         effects: new[] { new FlagEffect(GiftBread, FlagOperation.Set, 1), new FlagEffect(Settled(1), FlagOperation.Set, 1) }),
-                    Node("rule1_again", "벌써 해가 기우네. 해 지기 전엔 꼭 집에 들어가렴~", null, effects: heardRule1),
-                    Node("done", "얼른 들어가~ 해 지기 전에!", null),
+                    Node("rule1_again", "벌써 해가 기우네. 막차 놓치지 말고, 해 지기 전엔 꼭 집에 들어가렴~", null, effects: heardRule1),
+                    Node("done", "얼른 가~ 막차 놓치면 큰일이야!", null),
 
                     // DAY 2, 3 (배달 내용은 아직)
                     Node("d2", "잘 잤니, {player}? …누리 요즘 좀 큰 것 같지 않니~? 후후.", "d2_work"),
@@ -312,7 +318,7 @@ namespace KindNeighbors.EditorTools
             });
         }
 
-        /// <summary>프롤로그: 해 질 녘 버스 정류장으로 마중 나온 빵집 주인.</summary>
+        /// <summary>프롤로그: 해 질 녘 외곽 종점으로 마중 나온 빵집 주인. 숙소는 정류장 바로 앞, 옆은 솜의 집이다.</summary>
         static DialogueGraph CreateBakerBusStopDialogue() =>
             Asset<DialogueGraph>($"{Root}/Dialogue/Dlg_Baker_BusStop.asset", g =>
             {
@@ -328,24 +334,75 @@ namespace KindNeighbors.EditorTools
                     Node("arrive", "어머, 해 지기 전에 왔네! 다행이다~", "arrive2"),
                     Node("arrive2", "네가 {player}구나. 전단 보고 온 거지? 반가워~", "arrive3"),
                     Node("arrive3", "…짐이 그거 하나야? 후후, 괜찮아. 여기 오는 사람들은 다 사정이 있지~ 안 물어볼게.", "arrive4"),
-                    Node("arrive4", "숙소는 이 길 따라 쭉 내려가서, 광장 지나 남쪽 끝 하얀 집이야.", "arrive5"),
-                    Node("arrive5", "나는 먼저 가서 문 열어 둘게~ 천천히 와. 해 떨어지기 전에만!", null, effects: Set(MetBaker)),
-                    Node("remind", "남쪽 끝 하얀 집이야~ 해 떨어지기 전에!", null),
+                    Node("arrive4", "숙소는 바로 여기, 저 하얀 집이야. 배달원은 다 여기서 시작해~", "arrive5"),
+                    Node("arrive5", "옆집은… 지금은 비어 있어.", "arrive6"),
+                    Node("arrive6", "내일 아침 버스 타고 마을로 오렴. 내리면 바로 광장이고, 빵집은 광장 서쪽이야~", "arrive7"),
+                    Node("arrive7", "그럼 푹 자~ 나는 막차 타고 들어갈게!", null, effects: Set(MetBaker)),
+                    Node("remind", "얼른 들어가 쉬렴~ 해 떨어지기 전에!", null),
                 };
             });
 
-        /// <summary>프롤로그: 숙소 앞에서 기다리는 빵집 주인.</summary>
-        static DialogueGraph CreateBakerHomeDialogue() =>
-            Asset<DialogueGraph>($"{Root}/Dialogue/Dlg_Baker_Home.asset", g =>
-            {
-                g.speakerName = "빵집 주인";
-                g.entries = new List<DialogueEntry> { Entry("home") };
-                g.nodes = new List<DialogueNode>
-                {
-                    Node("home", "여기가 네 숙소야. 오는 길에 별일 없었지?", "home2"),
-                    Node("home2", "짐 풀고 푹 자~ 내일 아침엔 빵집으로 오렴. 광장 서쪽이야!", null),
-                };
-            });
+        // ---------- 배경 주민 한 마디 (위에서부터 처음 맞는 한 줄) ----------
+
+        public static ConditionalText[] BarksFlorist() => new[]
+        {
+            Line("해 진다~ 얼른 들어가야지.", TimeIs(TimeOfDay.Evening)),
+            Line("노란 꽃은 안 팔아~ 다 숲으로 가거든.", DayIs(3)),
+            Line("어젯밤 바람 소리 들었니? 똑똑, 똑똑~ 후후.", DayIs(2)),
+            Line("새 배달원이구나! 오늘 꽃이 예쁘게 폈어~"),
+        };
+
+        public static ConditionalText[] BarksGrocer() => new[]
+        {
+            Line("막차 놓치지 마, 신입~", TimeIs(TimeOfDay.Evening)),
+            Line("오늘 저녁엔 도시락이 하나 더 나간다며? 수고가 많네~", DayIs(3)),
+            Line("솜이랑 똑같은 가방이네~ 잘 어울려!", Is(HasBag)),
+            Line("어서 와~ 사과 하나 줄까? 아, 배달 중이구나!"),
+        };
+
+        public static ConditionalText[] BarksGossipA() => new[]
+        {
+            Line("오늘은 여기까지~ 들어가자.", TimeIs(TimeOfDay.Evening)),
+            Line("…그래서 그 집 막내가 창문을 열었대~"),
+        };
+
+        public static ConditionalText[] BarksGossipB() => new[]
+        {
+            Line("응응, 내일 봐~ 해 지기 전에!", TimeIs(TimeOfDay.Evening)),
+            Line("어머~ 그럼 이제 밤에 나가겠네~ 후후."),
+        };
+
+        public static ConditionalText[] BarksSweeper() => new[]
+        {
+            Line("자, 다들 들어가자~ 해 진다.", TimeIs(TimeOfDay.Evening)),
+            Line("해 지기 전엔 다 들어가야지~ 그게 편해."),
+        };
+
+        public static ConditionalText[] BarksShopper() => new[]
+        {
+            Line("아이고, 벌써 저녁이네~", TimeIs(TimeOfDay.Evening)),
+            Line("호두빵 나왔대~ 얼른 가 봐야지!"),
+        };
+
+        public static ConditionalText[] BarksKidA() => new[]
+        {
+            Line("엄마가 들어오래~!", TimeIs(TimeOfDay.Evening)),
+            Line("어젯밤에 누가 내 이름 불렀어! 대답 안 했지롱~", DayAtLeast(2)),
+            Line("잡았다~! 이번엔 네가 술래!"),
+        };
+
+        public static ConditionalText[] BarksKidB() => new[]
+        {
+            Line("내일 또 놀자~!", TimeIs(TimeOfDay.Evening)),
+            Line("배달원 언니야? 오빠야? 아무튼 안녕~!"),
+        };
+
+        public static ConditionalText[] BarksCat() => new[]
+        {
+            Line("…냐.", TimeIs(TimeOfDay.Evening)),
+            Line("…(숲 쪽을 한참 보고 있다)", DayAtLeast(2)),
+            Line("…냥."),
+        };
 
         /// <summary>선배 배달원 보리: 수다스럽고 다정하다. 솜을 늘 현재형으로 말한다.</summary>
         static DialogueGraph CreateSeniorDialogue() =>
@@ -370,7 +427,7 @@ namespace KindNeighbors.EditorTools
                     Node("bag3", "솜은 밤 근무라서 이제 안 써! 진짜 성실한 애야~ 길도 진짜 잘 알고.", "bag4"),
                     Node("bag4", "아, 저 벽에 수칙 붙어 있지? 꼭 읽어 둬~ 1번은 오늘 들었지?", null),
                     Node("working", "길 모르겠으면 게시판 봐~ 아, 솜은 게시판 안 보고도 다 외웠는데!", null),
-                    Node("evening", "오늘 수고했어! 해 떨어지기 전에 얼른 가~ 수칙 1번!", null),
+                    Node("evening", "오늘 수고했어! 막차 놓치지 마~ 수칙 1번!", null),
 
                     Node("d2_seen", "어젯밤에 창밖으로 뭐 지나갔지? 키 큰 거.", "d2_seen2"),
                     Node("d2_seen2", "아~ 그거 솜일 거야. 신입 왔다니까 인사하러 왔나 봐! 후후.", null),
@@ -433,12 +490,12 @@ namespace KindNeighbors.EditorTools
                     Node("hello", "어서 오렴~ 새로 온 배달원이구나. 빵집 주인이 칭찬을 많이 하더구나.", null),
                     Node("wait_bread", "빵은 우편함에 넣어 주면 된단다~ 손이 느려서 말이야, 호호.", null),
                     Node("thanks_bread", "빵 잘 받았단다, 고마워라~ 이건 답례로 털실 뭉치란다.", "ask_hat", effects: Set(GiftYarn)),
-                    Choice("ask_hat", "그 김에 이 털모자 좀 아이한테 갖다주겠니? 북쪽 길에서 놀고 있을 게다.",
+                    Choice("ask_hat", "그 김에 이 털모자 좀 아이한테 갖다주겠니? 우체국 뒤 북쪽 공터에서 놀고 있을 게다.",
                         ("네, 갖다줄게요", "accept_hat"),
                         ("나중에요", "later_hat")),
                     Node("accept_hat", "고맙구나. 요즘 밤바람이 차서 말이야~ 창문도 자꾸 덜컹거리고, 호호.", null, actions: Do(giveHat)),
                     Node("later_hat", "그래, 천천히 하렴~", null),
-                    Node("hat_remind", "아이는 북쪽 길에 있을 게다. 불 꺼진 집 근처 말이야~", null),
+                    Node("hat_remind", "아이는 우체국 뒤 북쪽 공터에 있을 게다~", null),
                     Node("hat_done", "아이가 좋아하더냐? 호호, 다행이구나.", null),
                     Node("rule2", "어서 오렴~ 아 참, 밤에 창문에서 똑똑, 똑똑 하면 열지 마~ 그냥 바람이야.", null, effects: Set(HeardRule2)),
                 };
@@ -467,7 +524,7 @@ namespace KindNeighbors.EditorTools
 
                     Node("receive_hat", "우와, 할머니 모자다!", "som_house", actions: Do(takeHat)),
                     // GDD: 불 꺼진 집을 지나칠 때 주민이 밝은 말투로 말한다
-                    Node("som_house", "저기 불 꺼진 집 보여? 솜이 살던 집이야.", "som_house2", effects: Set("heard.som_house")),
+                    Node("som_house", "너 종점 숙소에 살지? 그 옆에 불 꺼진 집 있잖아. 솜이 살던 집이야.", "som_house2", effects: Set("heard.som_house")),
                     Node("som_house2", "솜은 이제 밤에 나가~ 그래서 낮엔 없어!", "ask_letter"),
                     Choice("ask_letter", "아 맞다! 이거 빵집에 갖다줄래? 내가 그린 그림이야.",
                         ("그래, 갖다줄게", "accept_letter"),
@@ -552,7 +609,7 @@ namespace KindNeighbors.EditorTools
                     Line("보리 선배에게 낡은 배달 가방을 받았다. 솜이라는 사람이 쓰던 거라고 했다. 밤 근무라서 이제 안 쓴다고.", Is(HasBag)),
                     Line("빵을 할머니께 배달했다.", Delivered(d.breadOrder)),
                     Line("할머니가 답례로 털실 뭉치를 주셨다.", Is(GiftYarn)),
-                    Line("할머니의 털모자를 아이에게 전했다. 아이는 불 꺼진 집 앞에서 놀고 있었다.", Delivered(d.hatOrder)),
+                    Line("할머니의 털모자를 아이에게 전했다. 아이가 내 숙소 옆 불 꺼진 집이 솜의 집이라고 했다.", Delivered(d.hatOrder)),
                     Line("아이가 그린 그림을 빵집 주인께 전했다. 빵집 주인이 그림을 내게 주었다.", Is(GiftDrawing)),
                     Line("해 지기 전에 집에 돌아왔다.", Is(CameHome(1))),
                     Line("창밖으로 무언가 지나갔다. 키가 아주 컸다.", Is(SilhouetteSeen)),
@@ -661,22 +718,26 @@ namespace KindNeighbors.EditorTools
                 {
                     // 프롤로그
                     Line("정류장에 마중 나온 사람에게 말 걸기", DayIs(0), Not(MetBaker)),
-                    Line("광장 지나 남쪽 끝 하얀 집(숙소)으로 가기", DayIs(0)),
+                    Line("정류장 앞 하얀 집(숙소)에 들어가 쉬기", DayIs(0)),
 
                     // 밤
                     Line("잠자리에 들기", TimeIs(TimeOfDay.Night)),
 
                     // DAY 1
-                    Line("해 지기 전에 집에 들어가기", DayIs(1), Is(Settled(1))),
+                    Line("숙소에 들어가기", DayIs(1), Is(Settled(1)), Is(AtOutskirts)),
+                    Line("광장 정류장에서 막차 타고 숙소로 돌아가기", DayIs(1), Is(Settled(1))),
+                    Line("버스 타고 마을로 돌아가 정산 받기", DayIs(1), TimeIs(TimeOfDay.Evening), Is(AtOutskirts)),
                     Line("빵집으로 돌아가 정산 받기", DayIs(1), TimeIs(TimeOfDay.Evening)),
+                    Line("정류장에서 버스 타고 마을로 출근하기", DayIs(1), Not(Briefed), Is(AtOutskirts)),
                     Line("빵집으로 출근하기 (광장 서쪽)", DayIs(1), Not(Briefed)),
                     Line("휴게실의 보리에게 가방 받기", DayIs(1), Not(HasBag)),
                     Line("빵집 주인에게 첫 주문 받기", DayIs(1), Not(FlagKeys.Accepted(d.breadOrder.Id))),
                     Line("오늘의 배달 마치기 (빵집 게시판 참고)", DayIs(1)),
 
                     // DAY 2, 3 (배달 내용은 아직)
-                    Line("(임시) 동네를 돌아본 뒤 집 문 앞에서 하루 넘기기", DayAtLeast(2), TimeIs(TimeOfDay.Morning)),
-                    Line("해 지기 전에 집에 들어가기", DayAtLeast(2), TimeIs(TimeOfDay.Evening)),
+                    Line("(임시) 마을을 돌아본 뒤 숙소 문 앞에서 하루 넘기기", DayAtLeast(2), TimeIs(TimeOfDay.Morning)),
+                    Line("숙소에 들어가기", DayAtLeast(2), TimeIs(TimeOfDay.Evening), Is(AtOutskirts)),
+                    Line("막차 타고 숙소로 돌아가기", DayAtLeast(2), TimeIs(TimeOfDay.Evening)),
                 };
             });
 

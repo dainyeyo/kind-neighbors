@@ -48,16 +48,31 @@ MonoBehaviour:
     actions: []
   - id: arrive4
     speaker: 
-    text: "\uC219\uC18C\uB294 \uC774 \uAE38 \uB530\uB77C \uCB49 \uB0B4\uB824\uAC00\uC11C,
-      \uAD11\uC7A5 \uC9C0\uB098 \uB0A8\uCABD \uB05D \uD558\uC580 \uC9D1\uC774\uC57C."
+    text: "\uC219\uC18C\uB294 \uBC14\uB85C \uC5EC\uAE30, \uC800 \uD558\uC580 \uC9D1\uC774\uC57C.
+      \uBC30\uB2EC\uC6D0\uC740 \uB2E4 \uC5EC\uAE30\uC11C \uC2DC\uC791\uD574~"
     nextId: arrive5
     choices: []
     effects: []
     actions: []
   - id: arrive5
     speaker: 
-    text: "\uB098\uB294 \uBA3C\uC800 \uAC00\uC11C \uBB38 \uC5F4\uC5B4 \uB458\uAC8C~
-      \uCC9C\uCC9C\uD788 \uC640. \uD574 \uB5A8\uC5B4\uC9C0\uAE30 \uC804\uC5D0\uB9CC!"
+    text: "\uC606\uC9D1\uC740\u2026 \uC9C0\uAE08\uC740 \uBE44\uC5B4 \uC788\uC5B4."
+    nextId: arrive6
+    choices: []
+    effects: []
+    actions: []
+  - id: arrive6
+    speaker: 
+    text: "\uB0B4\uC77C \uC544\uCE68 \uBC84\uC2A4 \uD0C0\uACE0 \uB9C8\uC744\uB85C
+      \uC624\uB834. \uB0B4\uB9AC\uBA74 \uBC14\uB85C \uAD11\uC7A5\uC774\uACE0, \uBE75\uC9D1\uC740
+      \uAD11\uC7A5 \uC11C\uCABD\uC774\uC57C~"
+    nextId: arrive7
+    choices: []
+    effects: []
+    actions: []
+  - id: arrive7
+    speaker: 
+    text: "\uADF8\uB7FC \uD479 \uC790~ \uB098\uB294 \uB9C9\uCC28 \uD0C0\uACE0 \uB4E4\uC5B4\uAC08\uAC8C!"
     nextId: 
     choices: []
     effects:
@@ -67,7 +82,7 @@ MonoBehaviour:
     actions: []
   - id: remind
     speaker: 
-    text: "\uB0A8\uCABD \uB05D \uD558\uC580 \uC9D1\uC774\uC57C~ \uD574 \uB5A8\uC5B4\uC9C0\uAE30
+    text: "\uC5BC\uB978 \uB4E4\uC5B4\uAC00 \uC26C\uB834~ \uD574 \uB5A8\uC5B4\uC9C0\uAE30
       \uC804\uC5D0!"
     nextId: 
     choices: []

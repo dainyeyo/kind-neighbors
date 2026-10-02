@@ -98,18 +98,19 @@ namespace KindNeighbors.EditorTools
         /// <summary>창밖 풍경: 마을 뒷길 한 토막. 가로등 하나가 밤의 실루엣을 비춘다.</summary>
         static void BuildWindowView(Transform room)
         {
+            // 창밖은 종점의 길과 정류장. 가로등에 비친 정류장 벽 앞을 지나는 형체가 검은 실루엣으로 드러난다.
             Transform view = Group("WindowView", room);
-            BoxLocal("Ground", view, new Vector3(0f, -0.05f, 12f), new Vector3(34f, 0.1f, 18f), "Grass", default);
-            BoxLocal("Path", view, new Vector3(0f, 0.01f, 5.2f), new Vector3(34f, 0.02f, 2.2f), "Path", default);
-            // 길 바로 뒤의 이웃집 벽: 가로등에 비쳐 밝게 보이고, 그 앞을 지나는 형체가 검은 실루엣으로 드러난다
-            BoxLocal("House_Back_Wall", view, new Vector3(0f, 1.9f, 9f), new Vector3(14f, 3.8f, 0.6f), "HouseB", default);
-            NoCollider(BoxLocal("House_Back_Window", view, new Vector3(-3.5f, 2.1f, 8.68f), new Vector3(1f, 0.9f, 0.05f), "Window", default));
-            BoxLocal("House_Far_L", view, new Vector3(-7f, 1.75f, 13f), new Vector3(5f, 3.5f, 5f), "HouseA", default);
-            BoxLocal("House_Far_R", view, new Vector3(7.5f, 1.75f, 15f), new Vector3(5f, 3.5f, 5f), "HouseC", default);
-            for (int i = 0; i < 7; i++)
+            BoxLocal("Ground", view, new Vector3(0f, -0.05f, 12f), new Vector3(34f, 0.1f, 18f), "GrassDark", default);
+            BoxLocal("Road", view, new Vector3(0f, 0.01f, 5.2f), new Vector3(34f, 0.02f, 3f), "Path", default);
+            BoxLocal("Stop_Back", view, new Vector3(0.6f, 1.3f, 9f), new Vector3(5f, 2.6f, 0.12f), "Shelter", default);
+            BoxLocal("Stop_Roof", view, new Vector3(0.6f, 2.65f, 8.4f), new Vector3(5.2f, 0.12f, 1.4f), "Roof", default);
+            BoxLocal("Stop_Bench", view, new Vector3(0.6f, 0.45f, 8.7f), new Vector3(3.6f, 0.1f, 0.45f), "Desk", default);
+            NoCollider(BoxLocal("Stop_Sign", view, new Vector3(-2.6f, 2.3f, 7.6f), new Vector3(0.6f, 0.6f, 0.04f), "MailboxHome", default));
+            BoxLocal("Stop_SignPole", view, new Vector3(-2.6f, 1.1f, 7.6f), new Vector3(0.08f, 2.2f, 0.08f), "LampPole", default);
+            for (int i = 0; i < 9; i++)
             {
-                float x = -12f + i * 4f;
-                BoxLocal($"Tree_{i}", view, new Vector3(x, 2.5f, 20f + (i % 2) * 1.5f), new Vector3(1.8f, 5f, 1.8f), "Leaves", default);
+                float x = -16f + i * 4f;
+                BoxLocal($"Tree_{i}", view, new Vector3(x, 2.8f, 14f + (i % 3) * 1.5f), new Vector3(2f, 5.6f, 2f), "Leaves", default);
             }
         }
 
@@ -276,42 +277,6 @@ namespace KindNeighbors.EditorTools
             Prim(PrimitiveType.Cylinder, "Post", mailbox, position + Vector3.up * 0.5f, new Vector3(0.12f, 0.5f, 0.12f), "Trunk", default);
             Prim(PrimitiveType.Cube, "Box", mailbox, position + Vector3.up * 1.1f, new Vector3(0.5f, 0.4f, 0.7f), "MailboxHome", new Color(0.3f, 0.5f, 0.8f));
             AddReadable(mailbox.gameObject, data, data.newsletter, "소식지 읽기");
-        }
-
-        /// <summary>낮에만 있는 생활 소품과, 밤에 자리가 바뀌는 공, 저녁부터 켜지는 가로등.</summary>
-        static void CreateVillageProps(Transform map, PrototypeData data)
-        {
-            Transform day = Group("Props_Day", map);
-            // 빨랫줄 (House_B 옆)
-            Prim(PrimitiveType.Cylinder, "LaundryPole_L", day, new Vector3(-12f, 0.9f, -8f), new Vector3(0.08f, 0.9f, 0.08f), "Trunk", default);
-            Prim(PrimitiveType.Cylinder, "LaundryPole_R", day, new Vector3(-8f, 0.9f, -8f), new Vector3(0.08f, 0.9f, 0.08f), "Trunk", default);
-            NoCollider(Prim(PrimitiveType.Cube, "Line", day, new Vector3(-10f, 1.75f, -8f), new Vector3(4f, 0.02f, 0.02f), "LampPole", new Color(0.2f, 0.2f, 0.22f)));
-            NoCollider(Prim(PrimitiveType.Cube, "Cloth_1", day, new Vector3(-11f, 1.45f, -8f), new Vector3(0.7f, 0.6f, 0.03f), "ClothPink", new Color(0.95f, 0.7f, 0.75f)));
-            NoCollider(Prim(PrimitiveType.Cube, "Cloth_2", day, new Vector3(-9.6f, 1.5f, -8f), new Vector3(0.6f, 0.5f, 0.03f), "ClothBlue", new Color(0.6f, 0.75f, 0.95f)));
-            // 화분 (할머니 집 앞)
-            for (int i = 0; i < 3; i++)
-            {
-                var pot = Prim(PrimitiveType.Cylinder, $"FlowerPot_{i}", day, new Vector3(12.4f, 0.2f, -3.2f + i * 0.6f), new Vector3(0.35f, 0.2f, 0.35f), "Pot", new Color(0.75f, 0.45f, 0.3f));
-                NoCollider(Prim(PrimitiveType.Sphere, "Flower", pot.transform, pot.transform.position + Vector3.up * 0.35f, Vector3.one * 0.3f, "Flower", new Color(0.95f, 0.5f, 0.6f)));
-            }
-            // 광장의 공: 낮에는 광장, 밤에는 불 꺼진 집 앞
-            Prim(PrimitiveType.Sphere, "Ball", day, new Vector3(2f, 0.25f, 1.5f), Vector3.one * 0.5f, "Ball", new Color(0.9f, 0.3f, 0.3f));
-            PhaseSet("PhaseSet_DayProps", map, data, new[] { TimeOfDay.Morning, TimeOfDay.Evening }, day.gameObject);
-
-            Transform night = Group("Props_Night", map);
-            Prim(PrimitiveType.Sphere, "Ball_Moved", night, new Vector3(6.2f, 0.25f, 12.6f), Vector3.one * 0.5f, "Ball", default);
-            PhaseSet("PhaseSet_NightProps", map, data, new[] { TimeOfDay.Night }, night.gameObject);
-
-            // 가로등: 몇 개만 (GDD: 밤에는 가로등 몇 개만 켜짐)
-            Transform lamps = Group("StreetLamps", map);
-            var glows = new[]
-            {
-                StreetLamp(lamps, new Vector3(-6.5f, 0f, -6.5f)),
-                StreetLamp(lamps, new Vector3(6.5f, 0f, 6.5f)),
-                StreetLamp(lamps, new Vector3(1.8f, 0f, 20f)),
-                StreetLamp(lamps, new Vector3(1.8f, 0f, -13f)),
-            };
-            PhaseSet("PhaseSet_StreetLamps", map, data, new[] { TimeOfDay.Evening, TimeOfDay.Night }, glows);
         }
 
         static GameObject StreetLamp(Transform parent, Vector3 position)

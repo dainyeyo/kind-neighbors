@@ -32,3 +32,6 @@ MonoBehaviour:
   - key: home.d3
     operation: 0
     value: 1
+  - key: at.outskirts
+    operation: 0
+    value: 1

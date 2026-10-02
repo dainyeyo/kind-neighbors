@@ -1,5 +1,4 @@
 using KindNeighbors.Core.Flags;
-using KindNeighbors.Core.Text;
 using UnityEngine;
 
 namespace KindNeighbors.Flow
@@ -13,12 +12,6 @@ namespace KindNeighbors.Flow
     {
         public ConditionalText[] objectives;
 
-        public string Current(GameFlags flags)
-        {
-            foreach (var objective in objectives)
-                if (FlagCondition.All(objective.conditions, flags))
-                    return TextFormatter.Format(objective.text, flags);
-            return string.Empty;
-        }
+        public string Current(GameFlags flags) => ConditionalText.FirstMatch(objectives, flags);
     }
 }

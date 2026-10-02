@@ -22,4 +22,7 @@ MonoBehaviour:
     value: 1
   advancePrompt: "\uC219\uC18C\uC5D0 \uB4E4\uC5B4\uAC00 \uC26C\uAE30"
   spawnOnEnter: bus_stop
-  onEnter: []
+  onEnter:
+  - key: at.outskirts
+    operation: 0
+    value: 1

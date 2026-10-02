@@ -122,8 +122,8 @@ MonoBehaviour:
     actions: []
   - id: accept
     speaker: 
-    text: "\uACE0\uB9C8\uC6CC~ \uD560\uBA38\uB2C8 \uB301\uC740 \uAD11\uC7A5 \uAC74\uB108
-      \uB3D9\uCABD \uAE38 \uB05D\uC774\uC57C."
+    text: "\uACE0\uB9C8\uC6CC~ \uD560\uBA38\uB2C8 \uB301\uC740 \uAD11\uC7A5\uC5D0\uC11C
+      \uCC3B\uC9D1 \uC606 \uACE8\uBAA9\uC73C\uB85C \uB4E4\uC5B4\uAC00\uBA74 \uC788\uC5B4."
     nextId: 
     choices: []
     effects: []
@@ -140,7 +140,7 @@ MonoBehaviour:
   - id: remind_bread
     speaker: 
     text: "\uD560\uBA38\uB2C8\uB124 \uC6B0\uD3B8\uD568\uC5D0 \uB123\uC5B4 \uC8FC\uBA74
-      \uB3FC~ \uAD11\uC7A5 \uAC74\uB108 \uB3D9\uCABD \uAE38 \uB05D\uC774\uC57C."
+      \uB3FC~ \uCC3B\uC9D1 \uC606 \uB3D9\uCABD \uACE8\uBAA9\uC774\uC57C."
     nextId: 
     choices: []
     effects: []
@@ -205,8 +205,8 @@ MonoBehaviour:
     actions: []
   - id: rule1_again
     speaker: 
-    text: "\uBC8C\uC368 \uD574\uAC00 \uAE30\uC6B0\uB124. \uD574 \uC9C0\uAE30 \uC804\uC5D4
-      \uAF2D \uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uB834~"
+    text: "\uBC8C\uC368 \uD574\uAC00 \uAE30\uC6B0\uB124. \uB9C9\uCC28 \uB193\uCE58\uC9C0
+      \uB9D0\uACE0, \uD574 \uC9C0\uAE30 \uC804\uC5D4 \uAF2D \uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uB834~"
     nextId: 
     choices: []
     effects:
@@ -216,7 +216,7 @@ MonoBehaviour:
     actions: []
   - id: done
     speaker: 
-    text: "\uC5BC\uB978 \uB4E4\uC5B4\uAC00~ \uD574 \uC9C0\uAE30 \uC804\uC5D0!"
+    text: "\uC5BC\uB978 \uAC00~ \uB9C9\uCC28 \uB193\uCE58\uBA74 \uD070\uC77C\uC774\uC57C!"
     nextId: 
     choices: []
     effects: []

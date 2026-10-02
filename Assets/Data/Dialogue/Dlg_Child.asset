@@ -55,8 +55,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 10a7cd5771a32104a94a91ed43d9ba1d, type: 2}
   - id: som_house
     speaker: 
-    text: "\uC800\uAE30 \uBD88 \uAEBC\uC9C4 \uC9D1 \uBCF4\uC5EC? \uC19C\uC774 \uC0B4\uB358
-      \uC9D1\uC774\uC57C."
+    text: "\uB108 \uC885\uC810 \uC219\uC18C\uC5D0 \uC0B4\uC9C0? \uADF8 \uC606\uC5D0
+      \uBD88 \uAEBC\uC9C4 \uC9D1 \uC788\uC796\uC544. \uC19C\uC774 \uC0B4\uB358 \uC9D1\uC774\uC57C."
     nextId: som_house2
     choices: []
     effects:
