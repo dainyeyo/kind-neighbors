@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30d07a71299c29046af4951d44642a04, type: 3}
+  m_Name: Dlg_Quiet
+  m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Dialogue.DialogueGraph
+  speakerName: "\uB204\uB9AC"
+  entries:
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 3
+    startNodeId: d3
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 2
+    startNodeId: d2
+  - conditions:
+    - key: time
+      comparison: 0
+      value: 1
+    startNodeId: evening
+  - conditions:
+    - key: has.bag
+      comparison: 0
+      value: 1
+    startNodeId: bag
+  - conditions: []
+    startNodeId: hello
+  nodes:
+  - id: hello
+    speaker: 
+    text: "\u2026\uB204\uB9AC."
+    nextId: hello2
+    choices: []
+    effects: []
+    actions: []
+  - id: hello2
+    speaker: 
+    text: "\u2026\uBCF4\uB9AC\uD55C\uD14C \uAC00 \uBD10. \uAC00\uBC29."
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: bag
+    speaker: 
+    text: "\u2026\uADF8 \uAC00\uBC29, \uC19C \uAC70\uB124."
+    nextId: bag2
+    choices: []
+    effects: []
+    actions: []
+  - id: bag2
+    speaker: 
+    text: "\u2026\uC5B4\uAE68\uB048 \uAE38\uC774\uB294 \uC548 \uACE0\uCCD0\uB3C4
+      \uB3FC. \uAE08\uBC29 \uB9DE\uAC8C \uB3FC."
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: evening
+    speaker: 
+    text: "\u2026\uC232 \uCABD \uB2E4\uB140\uC62C\uAC8C."
+    nextId: evening2
+    choices: []
+    effects: []
+    actions: []
+  - id: evening2
+    speaker: 
+    text: "\u2026\uC751? \uD574? \uAD1C\uCC2E\uC544. \uB098\uB294."
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: d2
+    speaker: 
+    text: "\u2026\uCC3D\uBB38 \uC18C\uB9AC \uB098\uB3C4 \uC2E0\uACBD \uC4F0\uC9C0
+      \uB9C8."
+    nextId: d2b
+    choices: []
+    effects: []
+    actions: []
+  - id: d2b
+    speaker: 
+    text: "\u2026\uB098\uB294 \uAC00\uB054 \uC5F4\uC5B4 \uBD10."
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: d3
+    speaker: 
+    text: "\u2026\uC624\uB298 \uC800\uB141 \uB3C4\uC2DC\uB77D, \uB124 \uCC28\uB840\uB798."
+    nextId: d3b
+    choices: []
+    effects: []
+    actions: []
+  - id: d3b
+    speaker: 
+    text: "\u2026\uBC1B\uB294 \uC0AC\uB78C \uCE78\uC740 \uBE44\uC6CC \uB46C. \uC6D0\uB798
+      \uADF8\uB798."
+    nextId: 
+    choices: []
+    effects: []
+    actions: []

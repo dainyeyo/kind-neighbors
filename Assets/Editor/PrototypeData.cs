@@ -30,6 +30,9 @@ namespace KindNeighbors.EditorTools
         public const string SpawnBed = "home_bed";
         public const string SpawnInsideDoor = "home_inside_door";
         public const string SpawnOutsideDoor = "home_outside_door";
+        public const string SpawnBusStop = "bus_stop";
+        public const string SpawnBakeryInside = "bakery_inside";
+        public const string SpawnBakeryOutside = "bakery_outside";
 
         // 데이터에서 쓰는 플래그 키 (코드가 직접 읽는 키는 FlagKeys에 있다)
         public const string HasBag = "has.bag";
@@ -44,7 +47,12 @@ namespace KindNeighbors.EditorTools
         public const string KnockDone = "event.d2_knock";
         public const string WindowOpened = "window.opened.d2";
         public const string WindowIgnored = "window.ignored.d2";
+        public const string HeardRule3 = "heard.rule3";
+        public const string MetBaker = "met.baker";
+        public const string Briefed = "briefed.d1";
+        public const string PrologueSubtitleShown = "seen.prologue_bus";
         public static string CameHome(int day) => $"home.d{day}";
+        public static string Settled(int day) => $"settled.d{day}";
 
         public GameFlags flags;
         public PhaseEventChannel phaseChanged;
@@ -66,9 +74,18 @@ namespace KindNeighbors.EditorTools
         public DialogueGraph grandmaDialogue;
         public DialogueGraph childDialogue;
         public DialogueGraph windowDialogue;
+        public DialogueGraph bakerBusStopDialogue;
+        public DialogueGraph bakerHomeDialogue;
+        public DialogueGraph seniorDialogue;
+        public DialogueGraph quietDialogue;
         public DocumentAsset newsletter;
         public DocumentAsset myJournal;
         public DocumentAsset somJournal;
+        public DocumentAsset suitcase;
+        public DocumentAsset orderBoard;
+        public DocumentAsset rulesPoster;
+        public DocumentAsset somLocker;
+        public ObjectiveList objectives;
 
         public static PrototypeData LoadOrCreate()
         {
@@ -98,9 +115,18 @@ namespace KindNeighbors.EditorTools
             d.grandmaDialogue = CreateGrandmaDialogue(d);
             d.childDialogue = CreateChildDialogue(d);
             d.windowDialogue = CreateWindowDialogue();
+            d.bakerBusStopDialogue = CreateBakerBusStopDialogue();
+            d.bakerHomeDialogue = CreateBakerHomeDialogue();
+            d.seniorDialogue = CreateSeniorDialogue();
+            d.quietDialogue = CreateQuietDialogue();
             d.newsletter = CreateNewsletter();
             d.myJournal = CreateMyJournal(d);
             d.somJournal = CreateSomJournal();
+            d.suitcase = CreateSuitcase();
+            d.orderBoard = CreateOrderBoard(d);
+            d.rulesPoster = CreateRulesPoster();
+            d.somLocker = CreateSomLocker();
+            d.objectives = CreateObjectives(d);
 
             AssetDatabase.SaveAssets();
             return d;
@@ -157,7 +183,18 @@ namespace KindNeighbors.EditorTools
                 p.backgroundColor = new Color(0.03f, 0.04f, 0.08f);
             });
 
-            var phases = new List<PhaseDefinition>();
+            var phases = new List<PhaseDefinition>
+            {
+                // 프롤로그: 해 질 녘 막차로 도착. 빵집 주인을 만난 뒤 숙소 문에서 쉬면 DAY 1 아침이 된다.
+                Asset<PhaseDefinition>($"{Root}/Flow/Phases/Phase_D0_Prologue.asset", p =>
+                {
+                    p.phase = new GamePhase(0, TimeOfDay.Evening);
+                    p.lighting = evening;
+                    p.spawnOnEnter = SpawnBusStop;
+                    p.completeWhen = new[] { Is(MetBaker) };
+                    p.advancePrompt = "숙소에 들어가 쉬기";
+                }),
+            };
             for (int dayNumber = 1; dayNumber <= 3; dayNumber++)
             {
                 int n = dayNumber;
@@ -183,6 +220,9 @@ namespace KindNeighbors.EditorTools
                     p.phase = new GamePhase(n, TimeOfDay.Evening);
                     p.lighting = evening;
                     p.advancePrompt = "집에 들어가기";
+                    // 빵집에서 정산을 받아야 집에 들어갈 수 있다 (DAY 2, 3은 배달 내용이 정해지면 추가)
+                    if (n == 1)
+                        p.completeWhen = new[] { Is(Settled(1)) };
                 }));
                 phases.Add(Asset<PhaseDefinition>($"{Root}/Flow/Phases/Phase_D{n}_3_Night.asset", p =>
                 {
@@ -218,39 +258,158 @@ namespace KindNeighbors.EditorTools
             var takeLetter = DeliverOrder(d, d.letterOrder);
             var heardRule1 = Set(HeardRule1);
 
+            // 빵집 카운터의 주인: 아침 조회(동료 소개, 수칙 1) → 가방 받은 뒤 첫 주문 → 저녁 정산
             return Asset<DialogueGraph>($"{Root}/Dialogue/Dlg_Baker.asset", g =>
             {
                 g.speakerName = "빵집 주인";
                 g.entries = new List<DialogueEntry>
                 {
-                    Entry("done", Delivered(d.letterOrder)),
-                    Entry("letter_receive", Accepted(d.letterOrder)),
+                    Entry("d3", DayIs(3)),
+                    Entry("d2", DayIs(2)),
+                    Entry("done", Is(Settled(1))),
+                    Entry("settle", TimeIs(TimeOfDay.Evening)),
+                    Entry("letter_receive", Accepted(d.letterOrder), Not(FlagKeys.Delivered(d.letterOrder.Id))),
                     Entry("after_bread", Delivered(d.breadOrder)),
                     Entry("remind_bread", Accepted(d.breadOrder)),
+                    Entry("ask", Is(HasBag)),
+                    Entry("need_bag", Is(Briefed)),
                     Entry("greet"),
                 };
                 g.nodes = new List<DialogueNode>
                 {
-                    Node("greet", "어머, 네가 새로 온 배달원 {player}구나! 마침 잘 왔어~", "bag"),
-                    Node("bag", "자, 이 가방부터 받으렴. 전 배달원이 쓰던 거야. 아직 튼튼해~", "ask", effects: Set(HasBag)),
-                    Choice("ask", "그럼 첫 배달! 이 빵 바구니, 이웃 할머니네 우편함에 좀 넣어 줄래?",
+                    // 아침 조회
+                    Node("greet", "왔구나, {player}! 잘 잤니? 숙소는 좀 춥지 않았고?", "greet2"),
+                    Node("greet2", "여기가 우리 빵집이자 배달 사무소야~ 저기 휴게실에 있는 둘이 네 동료들이고.", "greet3"),
+                    Node("greet3", "보리한테 가방부터 받아 오렴. 그리고… 해 지기 전엔 꼭 집에 들어가렴~", null,
+                        effects: new[] { new FlagEffect(Briefed, FlagOperation.Set, 1), new FlagEffect(HeardRule1, FlagOperation.Set, 1) }),
+                    Node("need_bag", "보리한테 가방부터 받아 오렴~ 휴게실에 있을 거야.", null),
+
+                    // 첫 주문
+                    Choice("ask", "가방 받았구나! 잘 어울린다~ 그럼 첫 배달! 이 빵 바구니, 이웃 할머니네 우편함에 좀 넣어 줄래?",
                         ("네, 다녀올게요", "accept"),
                         ("지금은 좀…", "later")),
-                    Node("accept", "고마워~ 할머니 댁은 광장에서 오른쪽 길 끝이야.", "rule1", actions: Do(giveBread)),
-                    Node("rule1", "아, 그리고… 해 지기 전엔 꼭 집에 들어가렴~", null, effects: heardRule1),
+                    Node("accept", "고마워~ 할머니 댁은 광장 건너 동쪽 길 끝이야.", null, actions: Do(giveBread)),
                     Node("later", "그래그래, 천천히 해~ 빵은 식어도 맛있으니까!", null),
-                    Node("remind_bread", "할머니네 우편함에 넣어 주면 돼~ 광장에서 오른쪽 길 끝이야.", null),
+                    Node("remind_bread", "할머니네 우편함에 넣어 주면 돼~ 광장 건너 동쪽 길 끝이야.", null),
                     Node("after_bread", "할머니가 좋아하셨지? 할머니도 너한테 부탁할 게 있다던데~", null),
 
                     Node("letter_receive", "응? 아이가 나한테 그림을?", "letter_look", actions: Do(takeLetter)),
                     Node("letter_look", "어머, 우리 가게네! 이건 나, 이건 할머니, 이건 아이… 그리고 이 길쭉한 건 누굴까~?", "letter_gift"),
-                    Node("letter_gift", "후후, 잘 그렸네. 이 그림은 네가 가지렴~ 집에 걸어 두면 좋겠다.", "letter_end", effects: Set(GiftDrawing)),
-                    Node("letter_end", "오늘 정말 수고 많았어, {player}. 이건 오늘 일당 대신이야~ 갓 구운 빵!", "rule1_again", effects: Set(GiftBread)),
+                    Node("letter_gift", "후후, 잘 그렸네. 이 그림은 네가 가지렴~ 집에 걸어 두면 좋겠다.", null, effects: Set(GiftDrawing)),
+
+                    // 저녁 정산
+                    Node("settle", "오늘 정말 수고 많았어, {player}. 첫날인데 다 해냈네!", "settle2"),
+                    Node("settle2", "이건 오늘 일당 대신이야~ 갓 구운 빵!", "rule1_again",
+                        effects: new[] { new FlagEffect(GiftBread, FlagOperation.Set, 1), new FlagEffect(Settled(1), FlagOperation.Set, 1) }),
                     Node("rule1_again", "벌써 해가 기우네. 해 지기 전엔 꼭 집에 들어가렴~", null, effects: heardRule1),
-                    Node("done", "오늘 수고 많았어~ 해 지기 전엔 꼭 집에 들어가렴~", null),
+                    Node("done", "얼른 들어가~ 해 지기 전에!", null),
+
+                    // DAY 2, 3 (배달 내용은 아직)
+                    Node("d2", "잘 잤니, {player}? …누리 요즘 좀 큰 것 같지 않니~? 후후.", "d2_work"),
+                    Node("d2_work", "오늘 배달은 아직 준비 중이야. 동네 한 바퀴 돌고 오렴~", null),
+                    Node("d3", "오늘도 잘 부탁해~ 아, 오늘 저녁엔 특별한 배달이 하나 있단다.", null),
                 };
             });
         }
+
+        /// <summary>프롤로그: 해 질 녘 버스 정류장으로 마중 나온 빵집 주인.</summary>
+        static DialogueGraph CreateBakerBusStopDialogue() =>
+            Asset<DialogueGraph>($"{Root}/Dialogue/Dlg_Baker_BusStop.asset", g =>
+            {
+                g.speakerName = "빵집 주인";
+                g.entries = new List<DialogueEntry>
+                {
+                    Entry("remind", Is(MetBaker)),
+                    Entry("arrive"),
+                };
+                g.nodes = new List<DialogueNode>
+                {
+                    // 규칙 1을 처음 듣는 순간. 주인공은 아직 그게 규칙인 줄 모른다.
+                    Node("arrive", "어머, 해 지기 전에 왔네! 다행이다~", "arrive2"),
+                    Node("arrive2", "네가 {player}구나. 전단 보고 온 거지? 반가워~", "arrive3"),
+                    Node("arrive3", "…짐이 그거 하나야? 후후, 괜찮아. 여기 오는 사람들은 다 사정이 있지~ 안 물어볼게.", "arrive4"),
+                    Node("arrive4", "숙소는 이 길 따라 쭉 내려가서, 광장 지나 남쪽 끝 하얀 집이야.", "arrive5"),
+                    Node("arrive5", "나는 먼저 가서 문 열어 둘게~ 천천히 와. 해 떨어지기 전에만!", null, effects: Set(MetBaker)),
+                    Node("remind", "남쪽 끝 하얀 집이야~ 해 떨어지기 전에!", null),
+                };
+            });
+
+        /// <summary>프롤로그: 숙소 앞에서 기다리는 빵집 주인.</summary>
+        static DialogueGraph CreateBakerHomeDialogue() =>
+            Asset<DialogueGraph>($"{Root}/Dialogue/Dlg_Baker_Home.asset", g =>
+            {
+                g.speakerName = "빵집 주인";
+                g.entries = new List<DialogueEntry> { Entry("home") };
+                g.nodes = new List<DialogueNode>
+                {
+                    Node("home", "여기가 네 숙소야. 오는 길에 별일 없었지?", "home2"),
+                    Node("home2", "짐 풀고 푹 자~ 내일 아침엔 빵집으로 오렴. 광장 서쪽이야!", null),
+                };
+            });
+
+        /// <summary>선배 배달원 보리: 수다스럽고 다정하다. 솜을 늘 현재형으로 말한다.</summary>
+        static DialogueGraph CreateSeniorDialogue() =>
+            Asset<DialogueGraph>($"{Root}/Dialogue/Dlg_Senior.asset", g =>
+            {
+                g.speakerName = "보리";
+                g.entries = new List<DialogueEntry>
+                {
+                    Entry("d3_opened", DayIs(3), Is(WindowOpened)),
+                    Entry("d3_ignored", DayIs(3), Is(WindowIgnored)),
+                    Entry("d3", DayIs(3)),
+                    Entry("d2_seen", DayIs(2), Is(SilhouetteSeen)),
+                    Entry("d2", DayIs(2)),
+                    Entry("evening", TimeIs(TimeOfDay.Evening)),
+                    Entry("working", Is(HasBag)),
+                    Entry("bag"),
+                };
+                g.nodes = new List<DialogueNode>
+                {
+                    Node("bag", "네가 신입이구나! 난 보리, 3년 차야~ 모르는 거 있으면 다 물어봐!", "bag2"),
+                    Node("bag2", "자, 이거. 솜 거야. 이제 네 거~", "bag3", effects: Set(HasBag)),
+                    Node("bag3", "솜은 밤 근무라서 이제 안 써! 진짜 성실한 애야~ 길도 진짜 잘 알고.", "bag4"),
+                    Node("bag4", "아, 저 벽에 수칙 붙어 있지? 꼭 읽어 둬~ 1번은 오늘 들었지?", null),
+                    Node("working", "길 모르겠으면 게시판 봐~ 아, 솜은 게시판 안 보고도 다 외웠는데!", null),
+                    Node("evening", "오늘 수고했어! 해 떨어지기 전에 얼른 가~ 수칙 1번!", null),
+
+                    Node("d2_seen", "어젯밤에 창밖으로 뭐 지나갔지? 키 큰 거.", "d2_seen2"),
+                    Node("d2_seen2", "아~ 그거 솜일 거야. 신입 왔다니까 인사하러 왔나 봐! 후후.", null),
+                    Node("d2", "어젯밤 푹 잤어? 첫날은 원래 피곤해~ 솜도 첫날엔 바로 곯아떨어졌대.", null),
+
+                    Node("d3_opened", "어머, 창문 열어 봤어? 솜이 좋아했겠다~", "d3_opened2"),
+                    Node("d3_opened2", "…너 오늘 좀 커 보인다? 후후, 기분 탓인가.", null),
+                    Node("d3_ignored", "어젯밤에 똑똑 소리 났지? 안 열었어? 잘했어! 수칙 2번!", null),
+                    Node("d3", "오늘이 벌써 사흘째네~ 이제 완전 우리 마을 사람이다!", null),
+                };
+            });
+
+        /// <summary>조용한 동료 누리: 말수가 적고, 규칙을 대충 지킨다. 날마다 조금씩 커 보인다.</summary>
+        static DialogueGraph CreateQuietDialogue() =>
+            Asset<DialogueGraph>($"{Root}/Dialogue/Dlg_Quiet.asset", g =>
+            {
+                g.speakerName = "누리";
+                g.entries = new List<DialogueEntry>
+                {
+                    Entry("d3", DayIs(3)),
+                    Entry("d2", DayIs(2)),
+                    Entry("evening", TimeIs(TimeOfDay.Evening)),
+                    Entry("bag", Is(HasBag)),
+                    Entry("hello"),
+                };
+                g.nodes = new List<DialogueNode>
+                {
+                    Node("hello", "…누리.", "hello2"),
+                    Node("hello2", "…보리한테 가 봐. 가방.", null),
+                    Node("bag", "…그 가방, 솜 거네.", "bag2"),
+                    Node("bag2", "…어깨끈 길이는 안 고쳐도 돼. 금방 맞게 돼.", null),
+                    Node("evening", "…숲 쪽 다녀올게.", "evening2"),
+                    Node("evening2", "…응? 해? 괜찮아. 나는.", null),
+                    Node("d2", "…창문 소리 나도 신경 쓰지 마.", "d2b"),
+                    Node("d2b", "…나는 가끔 열어 봐.", null),
+                    Node("d3", "…오늘 저녁 도시락, 네 차례래.", "d3b"),
+                    Node("d3b", "…받는 사람 칸은 비워 둬. 원래 그래.", null),
+                };
+            });
 
         static DialogueGraph CreateGrandmaDialogue(PrototypeData d)
         {
@@ -389,7 +548,8 @@ namespace KindNeighbors.EditorTools
                 doc.paragraphs = new[]
                 {
                     Line("— 첫째 날 —"),
-                    Line("빵집 주인께 낡은 배달 가방을 받았다. 전 배달원이 쓰던 거라고 했다.", Is(HasBag)),
+                    Line("빵집에서 동료 두 명을 만났다. 보리 선배와 누리.", Is(Briefed)),
+                    Line("보리 선배에게 낡은 배달 가방을 받았다. 솜이라는 사람이 쓰던 거라고 했다. 밤 근무라서 이제 안 쓴다고.", Is(HasBag)),
                     Line("빵을 할머니께 배달했다.", Delivered(d.breadOrder)),
                     Line("할머니가 답례로 털실 뭉치를 주셨다.", Is(GiftYarn)),
                     Line("할머니의 털모자를 아이에게 전했다. 아이는 불 꺼진 집 앞에서 놀고 있었다.", Delivered(d.hatOrder)),
@@ -399,7 +559,7 @@ namespace KindNeighbors.EditorTools
                     Line("밤에 밖에서 느린 발소리가 났다.", Is(SilhouetteDone), Not(SilhouetteSeen)),
 
                     Line("— 둘째 날 —", DayAtLeast(2)),
-                    Line("오늘도 배달을 했다.", DayAtLeast(2)),
+                    Line("오늘도 배달을 했다.", Is(CameHome(2))),
                     Line("할머니가 밤에 똑똑 소리가 나면 열지 말라고 하셨다. 바람이라고.", Is(HeardRule2)),
                     Line("창문에서 소리가 났다. 열지 않았다. 바람이었을 것이다.", Is(WindowIgnored)),
                     Line("창문을 열었다. 아무도 없었다. 창틀에 노란 실이 걸려 있었다.", Is(WindowOpened)),
@@ -415,7 +575,7 @@ namespace KindNeighbors.EditorTools
                 doc.title = "배달 일지 (표지의 이름이 긁혀 있다)";
                 doc.paragraphs = new[]
                 {
-                    Line("— 첫째 날 —\n빵집 주인께 배달 가방을 받았다. 새것이다.\n빵을 할머니께 배달했다.\n할머니가 답례로 털실 뭉치를 주셨다.\n해 지기 전에 집에 돌아왔다.\n창밖으로 키 큰 누군가가 지나갔다. 아마 이웃이겠지.",
+                    Line("— 첫째 날 —\n빵집 주인께 배달 가방을 받았다. 새것이다.\n보리도 오늘 처음 왔다고 한다. 동기가 생겼다.\n빵을 할머니께 배달했다.\n할머니가 답례로 털실 뭉치를 주셨다.\n해 지기 전에 집에 돌아왔다.\n창밖으로 키 큰 누군가가 지나갔다. 아마 이웃이겠지.",
                         Is(CameHome(1))),
                     Line("— 둘째 날 —\n할머니가 밤에 똑똑 소리가 나면 열지 말라고 하셨다. 바람이라고.\n창문에서 똑똑 소리가 났다. 빵집 주인 목소리였다.\n…열어 봤다.",
                         Is(CameHome(2))),
@@ -423,6 +583,101 @@ namespace KindNeighbors.EditorTools
                         Is(CameHome(3))),
                 };
                 doc.emptyText = "(가방 안주머니에 낡은 수첩이 있다. 아직은 펼쳐 볼 마음이 들지 않는다.)";
+            });
+
+        /// <summary>주인공의 짐가방. 사연은 암시만 한다: 편도 버스표 하나만 읽을 수 있다.</summary>
+        static DocumentAsset CreateSuitcase() =>
+            Asset<DocumentAsset>($"{Root}/Home/Doc_Suitcase.asset", doc =>
+            {
+                doc.title = "짐가방";
+                doc.compact = true;
+                doc.paragraphs = new[]
+                {
+                    Line("겉주머니에 버스표가 꽂혀 있다."),
+                    Line("[ 편도 · 종점: 숲가 마을 ]"),
+                    Line(" "),
+                    Line("나머지는… 아직 열고 싶지 않다."),
+                };
+            });
+
+        /// <summary>빵집 게시판: 그날 배달 목록. 끝낸 주문에는 도장이 찍힌다.</summary>
+        static DocumentAsset CreateOrderBoard(PrototypeData d) =>
+            Asset<DocumentAsset>($"{Root}/Bakery/Doc_OrderBoard.asset", doc =>
+            {
+                doc.title = "오늘의 배달";
+                doc.compact = true;
+                doc.paragraphs = new[]
+                {
+                    Line("□ 빵 바구니 — 빵집 → 이웃 할머니 (우편함)", DayIs(1), Not(FlagKeys.Delivered(d.breadOrder.Id))),
+                    Line("■ 빵 바구니 — 빵집 → 이웃 할머니  [완료]", DayIs(1), Delivered(d.breadOrder)),
+                    Line("□ 털모자 — 이웃 할머니 → 아이", DayIs(1), Not(FlagKeys.Delivered(d.hatOrder.Id))),
+                    Line("■ 털모자 — 이웃 할머니 → 아이  [완료]", DayIs(1), Delivered(d.hatOrder)),
+                    Line("□ 그림 편지 — 아이 → 빵집", DayIs(1), Not(FlagKeys.Delivered(d.letterOrder.Id))),
+                    Line("■ 그림 편지 — 아이 → 빵집  [완료]", DayIs(1), Delivered(d.letterOrder)),
+                    Line("(오늘 배달은 준비 중)", DayAtLeast(2)),
+                    Line(" "),
+                    Line("※ 숲 경계 도시락 — 담당: 누리", DayAtLeast(1), new FlagCondition(FlagKeys.Day, Comparison.Less, 3)),
+                    Line("※ 숲 경계 도시락 — 담당: {player}", DayIs(3)),
+                };
+            });
+
+        /// <summary>
+        /// 배달원 수칙 포스터. 처음엔 1번만 읽히고, 2·3번 위에는 전단이 덧붙어 있다.
+        /// 그 규칙을 들은 날부터 전단이 떨어져 있다.
+        /// </summary>
+        static DocumentAsset CreateRulesPoster() =>
+            Asset<DocumentAsset>($"{Root}/Bakery/Doc_RulesPoster.asset", doc =>
+            {
+                doc.title = "배달원 수칙";
+                doc.paragraphs = new[]
+                {
+                    Line("1. 해 지기 전에 집에 들어갈 것."),
+                    Line("2. ▒▒▒▒▒▒▒▒▒▒ (위에 '호두빵 할인' 전단이 덧붙어 있다)", Not(HeardRule2)),
+                    Line("2. 창문을 두 번 두드리면 열지 말 것.", Is(HeardRule2)),
+                    Line("3. ▒▒▒▒▒▒▒▒▒▒ (위에 '노란 목도리를 찾습니다' 전단이 덧붙어 있다)", Not(HeardRule3)),
+                    Line("3. 이름을 불러도 대답하지 말 것.", Is(HeardRule3)),
+                    Line("※ 수칙을 지키지 않은 배달원은 밤 근무로 전환될 수 있습니다."),
+                };
+            });
+
+        static DocumentAsset CreateSomLocker() =>
+            Asset<DocumentAsset>($"{Root}/Bakery/Doc_SomLocker.asset", doc =>
+            {
+                doc.title = "사물함";
+                doc.compact = true;
+                doc.paragraphs = new[]
+                {
+                    Line("이름표가 테이프로 가려져 있다."),
+                    Line("테이프 끝으로 'ㅅ' 한 획이 비친다."),
+                    Line("잠겨 있다. 안에서 털실 냄새가 난다."),
+                };
+            });
+
+        /// <summary>HUD의 '할 일'. 위에서부터 처음 맞는 한 줄.</summary>
+        static ObjectiveList CreateObjectives(PrototypeData d) =>
+            Asset<ObjectiveList>($"{Root}/Flow/Objectives.asset", o =>
+            {
+                o.objectives = new[]
+                {
+                    // 프롤로그
+                    Line("정류장에 마중 나온 사람에게 말 걸기", DayIs(0), Not(MetBaker)),
+                    Line("광장 지나 남쪽 끝 하얀 집(숙소)으로 가기", DayIs(0)),
+
+                    // 밤
+                    Line("잠자리에 들기", TimeIs(TimeOfDay.Night)),
+
+                    // DAY 1
+                    Line("해 지기 전에 집에 들어가기", DayIs(1), Is(Settled(1))),
+                    Line("빵집으로 돌아가 정산 받기", DayIs(1), TimeIs(TimeOfDay.Evening)),
+                    Line("빵집으로 출근하기 (광장 서쪽)", DayIs(1), Not(Briefed)),
+                    Line("휴게실의 보리에게 가방 받기", DayIs(1), Not(HasBag)),
+                    Line("빵집 주인에게 첫 주문 받기", DayIs(1), Not(FlagKeys.Accepted(d.breadOrder.Id))),
+                    Line("오늘의 배달 마치기 (빵집 게시판 참고)", DayIs(1)),
+
+                    // DAY 2, 3 (배달 내용은 아직)
+                    Line("(임시) 동네를 돌아본 뒤 집 문 앞에서 하루 넘기기", DayAtLeast(2), TimeIs(TimeOfDay.Morning)),
+                    Line("해 지기 전에 집에 들어가기", DayAtLeast(2), TimeIs(TimeOfDay.Evening)),
+                };
             });
 
         // ---------- 헬퍼 ----------
@@ -444,9 +699,9 @@ namespace KindNeighbors.EditorTools
         static string ShortId(DeliveryOrder order) => order.Id.Replace("Order_", "");
 
         public static FlagCondition Is(string key) => new(key, Comparison.Equal, 1);
-        static FlagCondition Not(string key) => new(key, Comparison.Equal, 0);
+        public static FlagCondition Not(string key) => new(key, Comparison.Equal, 0);
         public static FlagCondition DayIs(int day) => new(FlagKeys.Day, Comparison.Equal, day);
-        static FlagCondition DayAtLeast(int day) => new(FlagKeys.Day, Comparison.GreaterOrEqual, day);
+        public static FlagCondition DayAtLeast(int day) => new(FlagKeys.Day, Comparison.GreaterOrEqual, day);
         public static FlagCondition TimeIs(TimeOfDay time) => new(FlagKeys.TimeOfDay, Comparison.Equal, (int)time);
         public static FlagCondition TimeIsNot(TimeOfDay time) => new(FlagKeys.TimeOfDay, Comparison.NotEqual, (int)time);
         static FlagCondition Accepted(DeliveryOrder order) => Is(FlagKeys.Accepted(order.Id));

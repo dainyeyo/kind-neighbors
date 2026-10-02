@@ -19,8 +19,8 @@ namespace KindNeighbors.Flow
         [SerializeField] VoidEventChannel advanceRequested;
         [SerializeField] TravelEventChannel travelRequested;
         [SerializeField] bool loadSaveOnStart = true;
-        [Tooltip("플레이어 이름이 정해질 때까지 첫 시간대를 시작하지 않는다 (이름 입력 화면)")]
-        [SerializeField] bool requirePlayerName = true;
+        [Tooltip("플레이어 이름이 정해질 때까지 첫 시간대를 시작하지 않는다.\n프롤로그 안에서 이름을 받는다면 끈다.")]
+        [SerializeField] bool requirePlayerName;
 
         readonly StateMachine machine = new();
         int phaseIndex = -1;

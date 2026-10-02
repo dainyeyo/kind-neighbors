@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83584545d23d871468a1495661b1c15a, type: 3}
-  m_Name: Phase_D1_2_Evening
+  m_Name: Phase_D0_Prologue
   m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Flow.PhaseDefinition
   phase:
-    day: 1
+    day: 0
     time: 1
   lighting: {fileID: 11400000, guid: 7461af343c1a2a6478d5a2216724b4bf, type: 2}
   completeWhen:
-  - key: settled.d1
+  - key: met.baker
     comparison: 0
     value: 1
-  advancePrompt: "\uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uAE30"
-  spawnOnEnter: 
+  advancePrompt: "\uC219\uC18C\uC5D0 \uB4E4\uC5B4\uAC00 \uC26C\uAE30"
+  spawnOnEnter: bus_stop
   onEnter: []

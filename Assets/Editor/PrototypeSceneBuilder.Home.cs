@@ -135,6 +135,10 @@ namespace KindNeighbors.EditorTools
             AddReadable(bag, data, data.somJournal, "가방 안주머니 살펴보기", PrototypeData.Is(PrototypeData.HasBag));
             Toggle("Toggle_Bag", room, data, bagRoot.gameObject, PrototypeData.Is(PrototypeData.HasBag));
 
+            // 짐가방: 사연은 암시만 (편도 버스표)
+            var suitcase = BoxLocal("Suitcase", room, new Vector3(-2.55f, 0.25f, -2.3f), new Vector3(0.8f, 0.5f, 0.35f), "Suitcase", new Color(0.35f, 0.33f, 0.38f));
+            AddReadable(suitcase, data, data.suitcase, "짐가방 살펴보기");
+
             // 선반과 답례품
             BoxLocal("Shelf", room, new Vector3(2.85f, 1.4f, -0.6f), new Vector3(0.4f, 0.06f, 1.8f), "Desk", default);
             var bread = BoxLocal("Gift_Bread", room, new Vector3(2.85f, 1.52f, -1.15f), new Vector3(0.3f, 0.18f, 0.22f), "GiftBread", new Color(0.85f, 0.65f, 0.35f));
@@ -372,7 +376,7 @@ namespace KindNeighbors.EditorTools
             SetArray(toggle, "targets", target);
         }
 
-        static void PhaseSet(string name, Transform parent, PrototypeData data, TimeOfDay[] times, params GameObject[] targets)
+        static PhaseObjectSet PhaseSet(string name, Transform parent, PrototypeData data, TimeOfDay[] times, params GameObject[] targets)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -380,6 +384,7 @@ namespace KindNeighbors.EditorTools
             SetRef(set, "phaseChanged", data.phaseChanged);
             SetArray(set, "targets", targets);
             SetEnumArray(set, "activeTimes", System.Array.ConvertAll(times, t => (int)t));
+            return set;
         }
 
         /// <param name="position">월드 좌표 (집 안이면 HomeOrigin을 더해야 한다)</param>

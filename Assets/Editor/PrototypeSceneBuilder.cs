@@ -79,10 +79,9 @@ namespace KindNeighbors.EditorTools
             SetRef(nameEntry, "flags", data.flags);
             SetRef(nameEntry, "inputLockRequested", data.inputLock);
 
-            // 낮 NPC: 밤에는 사라진다. 직접 배달받는 NPC는 머리 위에 목적지 마커가 뜬다.
+            // 낮 NPC: 밤과 프롤로그에는 없다. 직접 배달받는 NPC는 머리 위에 목적지 마커가 뜬다.
+            // 빵집 주인과 동료들은 빵집 안에 있다 (BuildBakery).
             Transform npcs = new GameObject("NPCs_Daytime").transform;
-            CreateNpc("NPC_BakeryOwner", npcs, bakeryNpcSpot.position, bakeryNpcSpot.rotation, 1.5f, 0.8f,
-                "NpcBakery", new Color(0.9f, 0.55f, 0.4f), data.bakerDialogue, data, deliveryManager, PrototypeData.BakerSpot);
             CreateNpc("NPC_Grandma", npcs, grandmaNpcSpot.position, grandmaNpcSpot.rotation, 1.2f, 0.75f,
                 "NpcGrandma", new Color(0.65f, 0.55f, 0.75f), data.grandmaDialogue, data, deliveryManager, null);
             // 아이: 불 꺼진 솜의 집 앞 북쪽 길에서 논다. 털모자를 전하러 가는 길에 솜의 집을 지나치게 된다.
@@ -93,6 +92,13 @@ namespace KindNeighbors.EditorTools
             SetRef(npcSet, "phaseChanged", data.phaseChanged);
             SetArray(npcSet, "targets", npcs.gameObject);
             SetEnumArray(npcSet, "activeTimes", (int)TimeOfDay.Morning, (int)TimeOfDay.Evening);
+            SetInt(npcSet, "fromDay", 1);
+
+            // 빵집 문: 낮과 저녁에만 연다 (프롤로그엔 닫혀 있다)
+            GameObject bakeryDoor = bakeryNpcSpot.parent.Find("Door").gameObject;
+            AddTravel(bakeryDoor, "빵집에 들어가기", PrototypeData.SpawnBakeryInside, data,
+                PrototypeData.TimeIsNot(TimeOfDay.Night), PrototypeData.DayAtLeast(1));
+            CreateSpawnPoint(PrototypeData.SpawnBakeryOutside, null, new Vector3(-12.1f, 0f, 0f), 90f);
 
             CreateMailbox(mailboxSpot, deliveryManager, PrototypeData.GrandmaMailbox);
 
@@ -108,6 +114,8 @@ namespace KindNeighbors.EditorTools
 
             CreateVillageProps(map, data);
             Vector3 bedSpawn = BuildHome(data, flow);
+            BuildBakery(data, deliveryManager);
+            BuildPrologue(map, data, deliveryManager);
 
             PlayerController player = CreatePlayer(bedSpawn, data, out PlayerInteractor interactor);
 
@@ -118,6 +126,8 @@ namespace KindNeighbors.EditorTools
             SetRef(hud, "orderAccepted", data.orderAccepted);
             SetRef(hud, "orderCompleted", data.orderCompleted);
             SetRef(hud, "subtitle", data.subtitle);
+            SetRef(hud, "objectives", data.objectives);
+            SetRef(hud, "flags", data.flags);
 
             var reader = systems.AddComponent<ReaderUI>();
             SetRef(reader, "documentRequested", data.documentRequested);

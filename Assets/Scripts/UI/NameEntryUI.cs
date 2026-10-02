@@ -5,19 +5,27 @@ using UnityEngine;
 namespace KindNeighbors.UI
 {
     /// <summary>
-    /// 새 게임에서 플레이어 이름을 입력받는다 (임시 IMGUI). 이름이 정해지면 GameFlowController가 첫 시간대를 시작한다.
+    /// 구인 전단의 이름 칸을 채우는 화면 (임시 IMGUI). 프롤로그에서 전단을 손에 든 채 시작한다.
     /// 세이브에 이름이 있으면 표시되지 않는다.
     /// </summary>
     public class NameEntryUI : MonoBehaviour
     {
         [SerializeField] GameFlags flags;
         [SerializeField] BoolEventChannel inputLockRequested;
-        [SerializeField] string defaultName = "배달원";
+        [SerializeField] string defaultName = "";
         [SerializeField] int maxLength = 8;
+        [TextArea(3, 8)]
+        [SerializeField] string flyerText =
+            "숲가 빵집 배달원 구함\n\n" +
+            "· 숙식 제공\n" +
+            "· 경험 무관\n" +
+            "· 아무것도 묻지 않습니다\n\n" +
+            "이름만 적어 오세요.";
 
         string input;
         bool showing;
-        GUIStyle titleStyle;
+        GUIStyle paperStyle;
+        GUIStyle bodyStyle;
         GUIStyle fieldStyle;
         GUIStyle hintStyle;
 
@@ -40,16 +48,23 @@ namespace KindNeighbors.UI
             if (!showing)
                 return;
 
-            titleStyle ??= new GUIStyle(GUI.skin.label) { fontSize = 26, alignment = TextAnchor.MiddleCenter, normal = { textColor = Color.white } };
-            fieldStyle ??= new GUIStyle(GUI.skin.textField) { fontSize = 24, alignment = TextAnchor.MiddleCenter };
-            hintStyle ??= new GUIStyle(GUI.skin.label) { fontSize = 16, alignment = TextAnchor.MiddleCenter, normal = { textColor = new Color(1f, 1f, 1f, 0.7f) } };
+            if (paperStyle == null)
+            {
+                var paper = new Texture2D(1, 1);
+                paper.SetPixel(0, 0, new Color(0.95f, 0.92f, 0.82f));
+                paper.Apply();
+                var ink = new Color(0.22f, 0.18f, 0.15f);
+                paperStyle = new GUIStyle(GUI.skin.box) { normal = { background = paper } };
+                bodyStyle = new GUIStyle(GUI.skin.label) { fontSize = 22, wordWrap = true, alignment = TextAnchor.UpperCenter, normal = { textColor = ink } };
+                fieldStyle = new GUIStyle(GUI.skin.textField) { fontSize = 24, alignment = TextAnchor.MiddleCenter };
+                hintStyle = new GUIStyle(GUI.skin.label) { fontSize = 15, alignment = TextAnchor.MiddleCenter, normal = { textColor = new Color(ink.r, ink.g, ink.b, 0.6f) } };
+            }
 
-            float w = Screen.width, h = Screen.height;
-            GUI.color = new Color(0f, 0f, 0f, 0.85f);
-            GUI.DrawTexture(new Rect(0, 0, w, h), Texture2D.whiteTexture);
-            GUI.color = Color.white;
-
-            GUI.Label(new Rect(0, h * 0.35f, w, 40), "새로 온 배달원의 이름은?", titleStyle);
+            float w = Mathf.Min(Screen.width * 0.42f, 460f);
+            float h = Mathf.Min(Screen.height * 0.72f, 560f);
+            var area = new Rect((Screen.width - w) / 2f, (Screen.height - h) / 2f, w, h);
+            GUI.Box(area, GUIContent.none, paperStyle);
+            GUI.Label(new Rect(area.x + 24, area.y + 28, area.width - 48, area.height * 0.6f), flyerText, bodyStyle);
 
             // 엔터 키는 텍스트 필드가 이벤트를 먹기 전에 확인한다
             Event e = Event.current;
@@ -60,11 +75,12 @@ namespace KindNeighbors.UI
                 return;
             }
 
+            float fieldY = area.y + area.height * 0.68f;
+            GUI.Label(new Rect(area.x, fieldY - 30, area.width, 26), "이름:", hintStyle);
             GUI.SetNextControlName("NameField");
-            input = GUI.TextField(new Rect(w / 2 - 150, h * 0.45f, 300, 44), input, maxLength, fieldStyle);
+            input = GUI.TextField(new Rect(area.x + 50, fieldY, area.width - 100, 44), input, maxLength, fieldStyle);
             GUI.FocusControl("NameField");
-
-            GUI.Label(new Rect(0, h * 0.45f + 56, w, 30), "Enter 로 시작", hintStyle);
+            GUI.Label(new Rect(area.x, fieldY + 56, area.width, 24), "Enter 로 적기", hintStyle);
         }
 
         void Confirm()
@@ -74,6 +90,7 @@ namespace KindNeighbors.UI
                 return;
 
             flags.SetText(FlagKeys.PlayerName, name);
+            flags.SetBool(FlagKeys.HasName, true);
             showing = false;
             inputLockRequested.Raise(false);
         }

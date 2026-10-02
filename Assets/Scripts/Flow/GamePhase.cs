@@ -26,6 +26,7 @@ namespace KindNeighbors.Flow
             _ => "밤",
         };
 
-        public override string ToString() => $"DAY {day} · {TimeLabel}";
+        /// <summary>Day 0은 프롤로그(마을에 도착한 날 저녁).</summary>
+        public override string ToString() => day == 0 ? "프롤로그" : $"DAY {day} · {TimeLabel}";
     }
 }

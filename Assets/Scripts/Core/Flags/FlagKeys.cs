@@ -15,6 +15,9 @@ namespace KindNeighbors.Core.Flags
         /// <summary>시작할 때 입력받는 플레이어 이름 (텍스트 플래그). 대사에서는 {player} 로 쓴다.</summary>
         public const string PlayerName = "player_name";
 
+        /// <summary>이름을 적었는가 (조건은 숫자 플래그만 볼 수 있으므로 따로 둔다).</summary>
+        public const string HasName = "has.name";
+
         // 잠들기 전 루틴. 규칙 위반으로 세지 않고, 밤 이벤트가 읽는다.
         public const string CurtainClosed = "curtain.closed";
         public const string LampOff = "lamp.off";

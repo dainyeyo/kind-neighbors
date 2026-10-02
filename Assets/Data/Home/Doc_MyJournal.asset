@@ -17,12 +17,19 @@ MonoBehaviour:
   - conditions: []
     text: "\u2014 \uCCAB\uC9F8 \uB0A0 \u2014"
   - conditions:
+    - key: briefed.d1
+      comparison: 0
+      value: 1
+    text: "\uBE75\uC9D1\uC5D0\uC11C \uB3D9\uB8CC \uB450 \uBA85\uC744 \uB9CC\uB0AC\uB2E4.
+      \uBCF4\uB9AC \uC120\uBC30\uC640 \uB204\uB9AC."
+  - conditions:
     - key: has.bag
       comparison: 0
       value: 1
-    text: "\uBE75\uC9D1 \uC8FC\uC778\uAED8 \uB0A1\uC740 \uBC30\uB2EC \uAC00\uBC29\uC744
-      \uBC1B\uC558\uB2E4. \uC804 \uBC30\uB2EC\uC6D0\uC774 \uC4F0\uB358 \uAC70\uB77C\uACE0
-      \uD588\uB2E4."
+    text: "\uBCF4\uB9AC \uC120\uBC30\uC5D0\uAC8C \uB0A1\uC740 \uBC30\uB2EC \uAC00\uBC29\uC744
+      \uBC1B\uC558\uB2E4. \uC19C\uC774\uB77C\uB294 \uC0AC\uB78C\uC774 \uC4F0\uB358
+      \uAC70\uB77C\uACE0 \uD588\uB2E4. \uBC24 \uADFC\uBB34\uB77C\uC11C \uC774\uC81C
+      \uC548 \uC4F4\uB2E4\uACE0."
   - conditions:
     - key: delivered.Order_D1_Bread
       comparison: 0
@@ -74,9 +81,9 @@ MonoBehaviour:
       value: 2
     text: "\u2014 \uB458\uC9F8 \uB0A0 \u2014"
   - conditions:
-    - key: day
-      comparison: 3
-      value: 2
+    - key: home.d2
+      comparison: 0
+      value: 1
     text: "\uC624\uB298\uB3C4 \uBC30\uB2EC\uC744 \uD588\uB2E4."
   - conditions:
     - key: heard.rule2

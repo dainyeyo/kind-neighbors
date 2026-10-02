@@ -1,4 +1,5 @@
 using KindNeighbors.Core.Events;
+using KindNeighbors.Core.Flags;
 using KindNeighbors.Delivery;
 using KindNeighbors.Flow;
 using KindNeighbors.Interaction;
@@ -17,6 +18,8 @@ namespace KindNeighbors.UI
         [SerializeField] DeliveryOrderEventChannel orderCompleted;
         [Tooltip("소리 대신 쓰는 자막 (사운드가 들어오기 전까지)")]
         [SerializeField] StringEventChannel subtitle;
+        [SerializeField] ObjectiveList objectives;
+        [SerializeField] GameFlags flags;
         [SerializeField] float toastDuration = 2.5f;
         [SerializeField] float subtitleDuration = 3.5f;
 
@@ -96,6 +99,9 @@ namespace KindNeighbors.UI
             GUI.Label(new Rect(16, 12, 600, 28), phaseText, labelStyle);
             string orderText = currentOrder != null ? $"배달 중: {currentOrder.itemName} → {currentOrder.recipientName}" : "배달 없음";
             GUI.Label(new Rect(16, 38, 600, 28), orderText, labelStyle);
+            string objective = objectives != null ? objectives.Current(flags) : string.Empty;
+            if (!string.IsNullOrEmpty(objective))
+                GUI.Label(new Rect(16, 64, 800, 28), $"할 일: {objective}", labelStyle);
 
             // 알림
             if (!string.IsNullOrEmpty(toast) && Time.time < toastUntil)

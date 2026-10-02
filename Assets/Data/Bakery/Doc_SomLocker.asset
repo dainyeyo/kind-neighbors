@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77503d03735368d49b7c838fe4c3125c, type: 3}
+  m_Name: Doc_SomLocker
+  m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Home.DocumentAsset
+  title: "\uC0AC\uBB3C\uD568"
+  paragraphs:
+  - conditions: []
+    text: "\uC774\uB984\uD45C\uAC00 \uD14C\uC774\uD504\uB85C \uAC00\uB824\uC838 \uC788\uB2E4."
+  - conditions: []
+    text: "\uD14C\uC774\uD504 \uB05D\uC73C\uB85C '\u3145' \uD55C \uD68D\uC774 \uBE44\uCE5C\uB2E4."
+  - conditions: []
+    text: "\uC7A0\uACA8 \uC788\uB2E4. \uC548\uC5D0\uC11C \uD138\uC2E4 \uB0C4\uC0C8\uAC00
+      \uB09C\uB2E4."
+  emptyText: "(\uC544\uC9C1 \uC544\uBB34\uAC83\uB3C4 \uC801\uD600 \uC788\uC9C0 \uC54A\uB2E4)"
+  compact: 1

@@ -15,14 +15,32 @@ MonoBehaviour:
   speakerName: "\uBE75\uC9D1 \uC8FC\uC778"
   entries:
   - conditions:
-    - key: delivered.Order_D1_Letter
+    - key: day
+      comparison: 0
+      value: 3
+    startNodeId: d3
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 2
+    startNodeId: d2
+  - conditions:
+    - key: settled.d1
       comparison: 0
       value: 1
     startNodeId: done
   - conditions:
+    - key: time
+      comparison: 0
+      value: 1
+    startNodeId: settle
+  - conditions:
     - key: accepted.Order_D1_Letter
       comparison: 0
       value: 1
+    - key: delivered.Order_D1_Letter
+      comparison: 0
+      value: 0
     startNodeId: letter_receive
   - conditions:
     - key: delivered.Order_D1_Bread
@@ -34,31 +52,63 @@ MonoBehaviour:
       comparison: 0
       value: 1
     startNodeId: remind_bread
+  - conditions:
+    - key: has.bag
+      comparison: 0
+      value: 1
+    startNodeId: ask
+  - conditions:
+    - key: briefed.d1
+      comparison: 0
+      value: 1
+    startNodeId: need_bag
   - conditions: []
     startNodeId: greet
   nodes:
   - id: greet
     speaker: 
-    text: "\uC5B4\uBA38, \uB124\uAC00 \uC0C8\uB85C \uC628 \uBC30\uB2EC\uC6D0 {player}\uAD6C\uB098!
-      \uB9C8\uCE68 \uC798 \uC654\uC5B4~"
-    nextId: bag
+    text: "\uC654\uAD6C\uB098, {player}! \uC798 \uC7A4\uB2C8? \uC219\uC18C\uB294
+      \uC880 \uCDA5\uC9C0 \uC54A\uC558\uACE0?"
+    nextId: greet2
     choices: []
     effects: []
     actions: []
-  - id: bag
+  - id: greet2
     speaker: 
-    text: "\uC790, \uC774 \uAC00\uBC29\uBD80\uD130 \uBC1B\uC73C\uB834. \uC804 \uBC30\uB2EC\uC6D0\uC774
-      \uC4F0\uB358 \uAC70\uC57C. \uC544\uC9C1 \uD2BC\uD2BC\uD574~"
-    nextId: ask
+    text: "\uC5EC\uAE30\uAC00 \uC6B0\uB9AC \uBE75\uC9D1\uC774\uC790 \uBC30\uB2EC
+      \uC0AC\uBB34\uC18C\uC57C~ \uC800\uAE30 \uD734\uAC8C\uC2E4\uC5D0 \uC788\uB294
+      \uB458\uC774 \uB124 \uB3D9\uB8CC\uB4E4\uC774\uACE0."
+    nextId: greet3
+    choices: []
+    effects: []
+    actions: []
+  - id: greet3
+    speaker: 
+    text: "\uBCF4\uB9AC\uD55C\uD14C \uAC00\uBC29\uBD80\uD130 \uBC1B\uC544 \uC624\uB834.
+      \uADF8\uB9AC\uACE0\u2026 \uD574 \uC9C0\uAE30 \uC804\uC5D4 \uAF2D \uC9D1\uC5D0
+      \uB4E4\uC5B4\uAC00\uB834~"
+    nextId: 
     choices: []
     effects:
-    - key: has.bag
+    - key: briefed.d1
+      operation: 0
+      value: 1
+    - key: heard.rule1
       operation: 0
       value: 1
     actions: []
+  - id: need_bag
+    speaker: 
+    text: "\uBCF4\uB9AC\uD55C\uD14C \uAC00\uBC29\uBD80\uD130 \uBC1B\uC544 \uC624\uB834~
+      \uD734\uAC8C\uC2E4\uC5D0 \uC788\uC744 \uAC70\uC57C."
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
   - id: ask
     speaker: 
-    text: "\uADF8\uB7FC \uCCAB \uBC30\uB2EC! \uC774 \uBE75 \uBC14\uAD6C\uB2C8, \uC774\uC6C3
+    text: "\uAC00\uBC29 \uBC1B\uC558\uAD6C\uB098! \uC798 \uC5B4\uC6B8\uB9B0\uB2E4~
+      \uADF8\uB7FC \uCCAB \uBC30\uB2EC! \uC774 \uBE75 \uBC14\uAD6C\uB2C8, \uC774\uC6C3
       \uD560\uBA38\uB2C8\uB124 \uC6B0\uD3B8\uD568\uC5D0 \uC880 \uB123\uC5B4 \uC904\uB798?"
     nextId: 
     choices:
@@ -72,24 +122,13 @@ MonoBehaviour:
     actions: []
   - id: accept
     speaker: 
-    text: "\uACE0\uB9C8\uC6CC~ \uD560\uBA38\uB2C8 \uB301\uC740 \uAD11\uC7A5\uC5D0\uC11C
-      \uC624\uB978\uCABD \uAE38 \uB05D\uC774\uC57C."
-    nextId: rule1
+    text: "\uACE0\uB9C8\uC6CC~ \uD560\uBA38\uB2C8 \uB301\uC740 \uAD11\uC7A5 \uAC74\uB108
+      \uB3D9\uCABD \uAE38 \uB05D\uC774\uC57C."
+    nextId: 
     choices: []
     effects: []
     actions:
     - {fileID: 11400000, guid: c16771d964737434f8833a1397fc4235, type: 2}
-  - id: rule1
-    speaker: 
-    text: "\uC544, \uADF8\uB9AC\uACE0\u2026 \uD574 \uC9C0\uAE30 \uC804\uC5D4 \uAF2D
-      \uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uB834~"
-    nextId: 
-    choices: []
-    effects:
-    - key: heard.rule1
-      operation: 0
-      value: 1
-    actions: []
   - id: later
     speaker: 
     text: "\uADF8\uB798\uADF8\uB798, \uCC9C\uCC9C\uD788 \uD574~ \uBE75\uC740 \uC2DD\uC5B4\uB3C4
@@ -101,7 +140,7 @@ MonoBehaviour:
   - id: remind_bread
     speaker: 
     text: "\uD560\uBA38\uB2C8\uB124 \uC6B0\uD3B8\uD568\uC5D0 \uB123\uC5B4 \uC8FC\uBA74
-      \uB3FC~ \uAD11\uC7A5\uC5D0\uC11C \uC624\uB978\uCABD \uAE38 \uB05D\uC774\uC57C."
+      \uB3FC~ \uAD11\uC7A5 \uAC74\uB108 \uB3D9\uCABD \uAE38 \uB05D\uC774\uC57C."
     nextId: 
     choices: []
     effects: []
@@ -135,21 +174,32 @@ MonoBehaviour:
     speaker: 
     text: "\uD6C4\uD6C4, \uC798 \uADF8\uB838\uB124. \uC774 \uADF8\uB9BC\uC740 \uB124\uAC00
       \uAC00\uC9C0\uB834~ \uC9D1\uC5D0 \uAC78\uC5B4 \uB450\uBA74 \uC88B\uACA0\uB2E4."
-    nextId: letter_end
+    nextId: 
     choices: []
     effects:
     - key: gift.drawing
       operation: 0
       value: 1
     actions: []
-  - id: letter_end
+  - id: settle
     speaker: 
-    text: "\uC624\uB298 \uC815\uB9D0 \uC218\uACE0 \uB9CE\uC558\uC5B4, {player}. \uC774\uAC74
-      \uC624\uB298 \uC77C\uB2F9 \uB300\uC2E0\uC774\uC57C~ \uAC13 \uAD6C\uC6B4 \uBE75!"
+    text: "\uC624\uB298 \uC815\uB9D0 \uC218\uACE0 \uB9CE\uC558\uC5B4, {player}. \uCCAB\uB0A0\uC778\uB370
+      \uB2E4 \uD574\uB0C8\uB124!"
+    nextId: settle2
+    choices: []
+    effects: []
+    actions: []
+  - id: settle2
+    speaker: 
+    text: "\uC774\uAC74 \uC624\uB298 \uC77C\uB2F9 \uB300\uC2E0\uC774\uC57C~ \uAC13
+      \uAD6C\uC6B4 \uBE75!"
     nextId: rule1_again
     choices: []
     effects:
     - key: gift.bread
+      operation: 0
+      value: 1
+    - key: settled.d1
       operation: 0
       value: 1
     actions: []
@@ -166,8 +216,31 @@ MonoBehaviour:
     actions: []
   - id: done
     speaker: 
-    text: "\uC624\uB298 \uC218\uACE0 \uB9CE\uC558\uC5B4~ \uD574 \uC9C0\uAE30 \uC804\uC5D4
-      \uAF2D \uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uB834~"
+    text: "\uC5BC\uB978 \uB4E4\uC5B4\uAC00~ \uD574 \uC9C0\uAE30 \uC804\uC5D0!"
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: d2
+    speaker: 
+    text: "\uC798 \uC7A4\uB2C8, {player}? \u2026\uB204\uB9AC \uC694\uC998 \uC880
+      \uD070 \uAC83 \uAC19\uC9C0 \uC54A\uB2C8~? \uD6C4\uD6C4."
+    nextId: d2_work
+    choices: []
+    effects: []
+    actions: []
+  - id: d2_work
+    speaker: 
+    text: "\uC624\uB298 \uBC30\uB2EC\uC740 \uC544\uC9C1 \uC900\uBE44 \uC911\uC774\uC57C.
+      \uB3D9\uB124 \uD55C \uBC14\uD034 \uB3CC\uACE0 \uC624\uB834~"
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: d3
+    speaker: 
+    text: "\uC624\uB298\uB3C4 \uC798 \uBD80\uD0C1\uD574~ \uC544, \uC624\uB298 \uC800\uB141\uC5D4
+      \uD2B9\uBCC4\uD55C \uBC30\uB2EC\uC774 \uD558\uB098 \uC788\uB2E8\uB2E4."
     nextId: 
     choices: []
     effects: []

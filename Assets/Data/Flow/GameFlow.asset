@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: GameFlow
   m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Flow.GameFlowConfig
   phases:
+  - {fileID: 11400000, guid: 2f27c43b01474d847b8a93f13d43a92d, type: 2}
   - {fileID: 11400000, guid: 937dcd7cffe74e8449019e9c1211faca, type: 2}
   - {fileID: 11400000, guid: e7987f10d5e5b8e45aac4b35a88358b2, type: 2}
   - {fileID: 11400000, guid: 35315e75db7d4544298d4469a45923ed, type: 2}

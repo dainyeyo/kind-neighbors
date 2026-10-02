@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77503d03735368d49b7c838fe4c3125c, type: 3}
+  m_Name: Doc_OrderBoard
+  m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Home.DocumentAsset
+  title: "\uC624\uB298\uC758 \uBC30\uB2EC"
+  paragraphs:
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    - key: delivered.Order_D1_Bread
+      comparison: 0
+      value: 0
+    text: "\u25A1 \uBE75 \uBC14\uAD6C\uB2C8 \u2014 \uBE75\uC9D1 \u2192 \uC774\uC6C3
+      \uD560\uBA38\uB2C8 (\uC6B0\uD3B8\uD568)"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    - key: delivered.Order_D1_Bread
+      comparison: 0
+      value: 1
+    text: "\u25A0 \uBE75 \uBC14\uAD6C\uB2C8 \u2014 \uBE75\uC9D1 \u2192 \uC774\uC6C3
+      \uD560\uBA38\uB2C8  [\uC644\uB8CC]"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    - key: delivered.Order_D1_Hat
+      comparison: 0
+      value: 0
+    text: "\u25A1 \uD138\uBAA8\uC790 \u2014 \uC774\uC6C3 \uD560\uBA38\uB2C8 \u2192
+      \uC544\uC774"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    - key: delivered.Order_D1_Hat
+      comparison: 0
+      value: 1
+    text: "\u25A0 \uD138\uBAA8\uC790 \u2014 \uC774\uC6C3 \uD560\uBA38\uB2C8 \u2192
+      \uC544\uC774  [\uC644\uB8CC]"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    - key: delivered.Order_D1_Letter
+      comparison: 0
+      value: 0
+    text: "\u25A1 \uADF8\uB9BC \uD3B8\uC9C0 \u2014 \uC544\uC774 \u2192 \uBE75\uC9D1"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 1
+    - key: delivered.Order_D1_Letter
+      comparison: 0
+      value: 1
+    text: "\u25A0 \uADF8\uB9BC \uD3B8\uC9C0 \u2014 \uC544\uC774 \u2192 \uBE75\uC9D1 
+      [\uC644\uB8CC]"
+  - conditions:
+    - key: day
+      comparison: 3
+      value: 2
+    text: "(\uC624\uB298 \uBC30\uB2EC\uC740 \uC900\uBE44 \uC911)"
+  - conditions: []
+    text: ' '
+  - conditions:
+    - key: day
+      comparison: 3
+      value: 1
+    - key: day
+      comparison: 4
+      value: 3
+    text: "\u203B \uC232 \uACBD\uACC4 \uB3C4\uC2DC\uB77D \u2014 \uB2F4\uB2F9: \uB204\uB9AC"
+  - conditions:
+    - key: day
+      comparison: 0
+      value: 3
+    text: "\u203B \uC232 \uACBD\uACC4 \uB3C4\uC2DC\uB77D \u2014 \uB2F4\uB2F9: {player}"
+  emptyText: "(\uC544\uC9C1 \uC544\uBB34\uAC83\uB3C4 \uC801\uD600 \uC788\uC9C0 \uC54A\uB2E4)"
+  compact: 1
