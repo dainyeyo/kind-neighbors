@@ -1,3 +1,4 @@
+using KindNeighbors.Core.Events;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -16,6 +17,8 @@ namespace KindNeighbors.Player
         [SerializeField] Transform body;
         [SerializeField] Transform cameraPivot;
         [SerializeField] Camera playerCamera;
+        [Tooltip("true가 오면 입력을 잠근다 (대화, 컷신)")]
+        [SerializeField] BoolEventChannel inputLockRequested;
 
         [Header("Movement")]
         [SerializeField] float walkSpeed = 3.5f;
@@ -40,19 +43,43 @@ namespace KindNeighbors.Player
         float yaw;
         float pitch;
         float verticalVelocity;
+        bool inputLocked;
+        int unlockFrame = -1;
 
         public ViewMode ViewMode => viewMode;
         public Camera Camera => playerCamera;
         public Transform CameraPivot => cameraPivot;
 
-        /// <summary>대화·컷신 중에는 false로 두어 이동/시점 입력을 막는다.</summary>
-        public bool InputEnabled { get; set; } = true;
+        /// <summary>
+        /// 이동/시점/상호작용 입력을 받을 수 있는가.
+        /// 잠금이 풀린 프레임에는 아직 false라서, 대화를 끝낸 E 키가 같은 프레임에 다시 상호작용하지 않는다.
+        /// </summary>
+        public bool InputEnabled => !inputLocked && Time.frameCount > unlockFrame;
 
         void Awake()
         {
             controller = GetComponent<CharacterController>();
             bodyRenderers = body.GetComponentsInChildren<Renderer>();
             yaw = body.eulerAngles.y;
+        }
+
+        void OnEnable()
+        {
+            if (inputLockRequested != null)
+                inputLockRequested.Raised += SetInputLocked;
+        }
+
+        void OnDisable()
+        {
+            if (inputLockRequested != null)
+                inputLockRequested.Raised -= SetInputLocked;
+        }
+
+        public void SetInputLocked(bool locked)
+        {
+            inputLocked = locked;
+            if (!locked)
+                unlockFrame = Time.frameCount;
         }
 
         void Start()

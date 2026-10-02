@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83584545d23d871468a1495661b1c15a, type: 3}
+  m_Name: Phase_D1_1_Morning
+  m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Flow.PhaseDefinition
+  phase:
+    day: 1
+    time: 0
+  lighting: {fileID: 11400000, guid: 17ec0fe88fca70c4da8a8820f23d6c02, type: 2}
+  completeWhen:
+  - key: delivered.Order_D1_Bread
+    comparison: 0
+    value: 1
+  advancePrompt: 

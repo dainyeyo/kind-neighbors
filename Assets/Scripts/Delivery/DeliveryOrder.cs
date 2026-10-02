@@ -12,5 +12,8 @@ namespace KindNeighbors.Delivery
         [Tooltip("DeliveryDestination.destinationId 와 일치해야 한다")]
         public string destinationId;
         public bool isSpecial;
+
+        /// <summary>플래그 키에 쓰는 식별자. 에셋 이름을 그대로 쓰므로 에셋 이름을 바꾸면 세이브 호환이 깨진다.</summary>
+        public string Id => name;
     }
 }

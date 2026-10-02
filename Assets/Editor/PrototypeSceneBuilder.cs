@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using KindNeighbors.Delivery;
+using KindNeighbors.Dialogue;
+using KindNeighbors.Flow;
 using KindNeighbors.Interaction;
 using KindNeighbors.Player;
+using KindNeighbors.Save;
 using KindNeighbors.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -10,62 +13,103 @@ using UnityEngine;
 namespace KindNeighbors.EditorTools
 {
     /// <summary>
-    /// M0 프로토타입용 회색 박스 씬을 생성한다. 다시 실행하면 씬을 처음부터 새로 만든다.
+    /// 프로토타입 회색 박스 씬을 생성한다. 다시 실행하면 씬을 처음부터 새로 만든다 (데이터 에셋은 유지).
     /// 맵 에셋이 정해지면 각 Greybox 오브젝트를 실제 모델로 교체하면 된다.
     /// </summary>
-    public static class M0SceneBuilder
+    public static class PrototypeSceneBuilder
     {
-        const string ScenePath = "Assets/Scenes/M0_Prototype.unity";
+        const string ScenePath = "Assets/Scenes/Prototype.unity";
         const string MaterialFolder = "Assets/Materials/Greybox";
-        const string OrderFolder = "Assets/Data/Orders";
         const int IgnoreRaycastLayer = 2;
 
         static readonly Dictionary<string, Material> materials = new();
 
-        [MenuItem("Kind Neighbors/Build M0 Prototype Scene")]
+        [MenuItem("Kind Neighbors/Build Prototype Scene")]
         public static void Build()
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
                 return;
 
-            EnsureFolder("Assets/Scenes");
-            EnsureFolder(MaterialFolder);
-            EnsureFolder(OrderFolder);
+            PrototypeData.EnsureFolder("Assets/Scenes");
+            PrototypeData.EnsureFolder(MaterialFolder);
             materials.Clear();
 
+            // 새 씬을 연 다음에 에셋을 불러와야 한다. 순서가 반대면 씬 전환 시 언로드된 에셋 참조가 null로 저장된다.
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            PrototypeData data = PrototypeData.LoadOrCreate();
 
-            CreateLighting();
+            Light sun = CreateLighting();
             Transform map = new GameObject("Map").transform;
             CreateGround(map);
-            CreateBuildings(map, out Transform bakeryNpcSpot, out Transform mailboxSpot);
+            CreateBuildings(map, out Transform bakeryNpcSpot, out Transform mailboxSpot, out GameObject playerDoor);
             CreateForestEdge(map);
 
+            // 시스템: 서로 직접 참조하지 않고 데이터 에셋(플래그, 이벤트 채널)만 공유한다
             var systems = new GameObject("Systems");
-            var deliveryManager = systems.AddComponent<DeliveryManager>();
 
-            DeliveryOrder breadOrder = CreateOrAssignOrder("Order_D1_Bread", "빵 바구니", "빵집 주인", "이웃 할머니", "grandma_house");
-            CreateBakeryOwner(bakeryNpcSpot, deliveryManager, breadOrder);
+            var flow = systems.AddComponent<GameFlowController>();
+            SetRef(flow, "config", data.flow);
+            SetRef(flow, "flags", data.flags);
+            SetRef(flow, "phaseChanged", data.phaseChanged);
+            SetRef(flow, "advanceRequested", data.advanceRequested);
+
+            var lighting = systems.AddComponent<LightingController>();
+            SetRef(lighting, "phaseChanged", data.phaseChanged);
+            SetRef(lighting, "sun", sun);
+
+            var deliveryManager = systems.AddComponent<DeliveryManager>();
+            SetRef(deliveryManager, "flags", data.flags);
+            SetRef(deliveryManager, "orderRequested", data.orderRequested);
+            SetRef(deliveryManager, "orderAccepted", data.orderAccepted);
+            SetRef(deliveryManager, "orderCompleted", data.orderCompleted);
+
+            var runner = systems.AddComponent<DialogueRunner>();
+            SetRef(runner, "flags", data.flags);
+            SetRef(runner, "dialogueRequested", data.dialogueRequested);
+            SetRef(runner, "dialogueActive", data.dialogueActive);
+            SetRef(systems.AddComponent<DialogueUI>(), "runner", runner);
+
+            // 낮 NPC: 밤에는 사라진다
+            Transform npcs = new GameObject("NPCs_Daytime").transform;
+            CreateBakeryOwner(bakeryNpcSpot, npcs, data);
+            var npcSet = new GameObject("PhaseSet_DaytimeNPCs").AddComponent<PhaseObjectSet>();
+            SetRef(npcSet, "phaseChanged", data.phaseChanged);
+            SetArray(npcSet, "targets", npcs.gameObject);
+            SetEnumArray(npcSet, "activeTimes", (int)TimeOfDay.Morning, (int)TimeOfDay.Evening);
+
             CreateMailbox(mailboxSpot, deliveryManager, "grandma_house");
 
-            PlayerController player = CreatePlayer(new Vector3(0f, 0f, -8f), out PlayerInteractor interactor);
+            var homeDoor = playerDoor.AddComponent<PhaseAdvanceTrigger>();
+            SetRef(homeDoor, "flow", flow);
+            SetRef(homeDoor, "advanceRequested", data.advanceRequested);
+
+            PlayerController player = CreatePlayer(new Vector3(0f, 0f, -8f), data, out PlayerInteractor interactor);
 
             var hud = systems.AddComponent<PrototypeHUD>();
             SetRef(hud, "player", player);
             SetRef(hud, "interactor", interactor);
-            SetRef(hud, "deliveryManager", deliveryManager);
+            SetRef(hud, "phaseChanged", data.phaseChanged);
+            SetRef(hud, "orderAccepted", data.orderAccepted);
+            SetRef(hud, "orderCompleted", data.orderCompleted);
 
             EditorSceneManager.SaveScene(scene, ScenePath);
-            AddSceneToBuildSettings(ScenePath);
+            SetBuildScenes(ScenePath);
             AssetDatabase.SaveAssets();
-            Debug.Log($"[M0SceneBuilder] {ScenePath} 생성 완료");
+            Debug.Log($"[PrototypeSceneBuilder] {ScenePath} 생성 완료");
+        }
+
+        [MenuItem("Kind Neighbors/Delete Save File")]
+        public static void DeleteSave()
+        {
+            SaveSystem.Delete();
+            Debug.Log($"[Save] 세이브 삭제: {SaveSystem.FilePath}");
         }
 
         // ---------- 환경 ----------
 
-        static void CreateLighting()
+        static Light CreateLighting()
         {
-            var sun = new GameObject("Sun (Day)").AddComponent<Light>();
+            var sun = new GameObject("Sun").AddComponent<Light>();
             sun.type = LightType.Directional;
             sun.color = new Color(1f, 0.93f, 0.8f);
             sun.intensity = 0.9f;
@@ -76,6 +120,7 @@ namespace KindNeighbors.EditorTools
             RenderSettings.ambientSkyColor = new Color(0.55f, 0.6f, 0.7f);
             RenderSettings.ambientEquatorColor = new Color(0.5f, 0.5f, 0.47f);
             RenderSettings.ambientGroundColor = new Color(0.3f, 0.28f, 0.25f);
+            return sun;
         }
 
         static void CreateGround(Transform map)
@@ -91,7 +136,7 @@ namespace KindNeighbors.EditorTools
             Box("Road_South", map, new Vector3(0f, 0.01f, -10f), new Vector3(3f, 0.02f, 10f), "Path", default);
         }
 
-        static void CreateBuildings(Transform map, out Transform bakeryNpcSpot, out Transform mailboxSpot)
+        static void CreateBuildings(Transform map, out Transform bakeryNpcSpot, out Transform mailboxSpot, out GameObject playerDoor)
         {
             Transform buildings = new GameObject("Buildings").transform;
             buildings.SetParent(map);
@@ -115,8 +160,9 @@ namespace KindNeighbors.EditorTools
             House("House_B", buildings, new Vector3(-8f, 0f, -12f), 90f, new Vector3(5f, 3.5f, 5f), "HouseB", new Color(0.95f, 0.85f, 0.7f));
             House("House_C", buildings, new Vector3(9f, 0f, -12f), -90f, new Vector3(5f, 3.5f, 5f), "HouseC", new Color(0.75f, 0.92f, 0.78f));
 
-            // 플레이어 집 (남쪽 끝)
-            House("House_Player", buildings, new Vector3(0f, 0f, -18f), 0f, new Vector3(5f, 3.5f, 5f), "HousePlayer", new Color(0.95f, 0.95f, 0.88f));
+            // 플레이어 집 (남쪽 끝) — 문으로 시간대를 넘긴다 (집에 들어가기, 잠자기)
+            Transform home = House("House_Player", buildings, new Vector3(0f, 0f, -18f), 0f, new Vector3(5f, 3.5f, 5f), "HousePlayer", new Color(0.95f, 0.95f, 0.88f));
+            playerDoor = home.Find("Door").gameObject;
         }
 
         static void CreateForestEdge(Transform map)
@@ -142,18 +188,19 @@ namespace KindNeighbors.EditorTools
 
         // ---------- 상호작용 대상 ----------
 
-        static void CreateBakeryOwner(Transform spot, DeliveryManager manager, DeliveryOrder order)
+        static void CreateBakeryOwner(Transform spot, Transform parent, PrototypeData data)
         {
-            var npc = Prim(PrimitiveType.Capsule, "NPC_BakeryOwner", null, spot.position + Vector3.up * 0.75f, new Vector3(0.8f, 0.75f, 0.8f),
+            var npc = Prim(PrimitiveType.Capsule, "NPC_BakeryOwner", parent, spot.position + Vector3.up * 0.75f, new Vector3(0.8f, 0.75f, 0.8f),
                 "NpcBakery", new Color(0.9f, 0.55f, 0.4f));
             npc.transform.rotation = spot.rotation;
             Prim(PrimitiveType.Cube, "Face", npc.transform, npc.transform.position + npc.transform.forward * 0.4f + Vector3.up * 0.3f,
                 new Vector3(0.3f, 0.15f, 0.1f), "Face", new Color(0.2f, 0.15f, 0.15f)).transform.rotation = spot.rotation;
             Object.DestroyImmediate(npc.transform.Find("Face").GetComponent<Collider>());
 
-            var client = npc.AddComponent<DeliveryClient>();
-            SetRef(client, "manager", manager);
-            SetArray(client, "orders", order);
+            var dialogue = npc.AddComponent<NpcDialogue>();
+            SetRef(dialogue, "graph", data.bakerDialogue);
+            SetRef(dialogue, "flags", data.flags);
+            SetRef(dialogue, "dialogueRequested", data.dialogueRequested);
         }
 
         static void CreateMailbox(Transform spot, DeliveryManager manager, string destinationId)
@@ -177,7 +224,7 @@ namespace KindNeighbors.EditorTools
 
         // ---------- 플레이어 ----------
 
-        static PlayerController CreatePlayer(Vector3 position, out PlayerInteractor interactor)
+        static PlayerController CreatePlayer(Vector3 position, PrototypeData data, out PlayerInteractor interactor)
         {
             var root = new GameObject("Player");
             root.transform.position = position;
@@ -214,6 +261,7 @@ namespace KindNeighbors.EditorTools
             SetRef(controller, "body", body);
             SetRef(controller, "cameraPivot", pivot);
             SetRef(controller, "playerCamera", cam);
+            SetRef(controller, "inputLockRequested", data.dialogueActive);
 
             interactor = root.AddComponent<PlayerInteractor>();
             SetRef(interactor, "player", controller);
@@ -294,23 +342,6 @@ namespace KindNeighbors.EditorTools
             return mat;
         }
 
-        static DeliveryOrder CreateOrAssignOrder(string assetName, string item, string client, string recipient, string destinationId)
-        {
-            string path = $"{OrderFolder}/{assetName}.asset";
-            var order = AssetDatabase.LoadAssetAtPath<DeliveryOrder>(path);
-            if (order == null)
-            {
-                order = ScriptableObject.CreateInstance<DeliveryOrder>();
-                AssetDatabase.CreateAsset(order, path);
-            }
-            order.itemName = item;
-            order.clientName = client;
-            order.recipientName = recipient;
-            order.destinationId = destinationId;
-            EditorUtility.SetDirty(order);
-            return order;
-        }
-
         static void SetRef(Object target, string field, Object value)
         {
             var so = new SerializedObject(target);
@@ -335,6 +366,16 @@ namespace KindNeighbors.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        static void SetEnumArray(Object target, string field, params int[] values)
+        {
+            var so = new SerializedObject(target);
+            var prop = so.FindProperty(field);
+            prop.arraySize = values.Length;
+            for (int i = 0; i < values.Length; i++)
+                prop.GetArrayElementAtIndex(i).enumValueIndex = values[i];
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         static void SetLayerRecursive(GameObject go, int layer)
         {
             go.layer = layer;
@@ -342,18 +383,11 @@ namespace KindNeighbors.EditorTools
                 SetLayerRecursive(child.gameObject, layer);
         }
 
-        static void EnsureFolder(string path)
-        {
-            if (AssetDatabase.IsValidFolder(path)) return;
-            string parent = System.IO.Path.GetDirectoryName(path).Replace('\\', '/');
-            EnsureFolder(parent);
-            AssetDatabase.CreateFolder(parent, System.IO.Path.GetFileName(path));
-        }
-
-        static void AddSceneToBuildSettings(string path)
+        /// <summary>이 씬을 첫 번째 빌드 씬으로 두고, 이미 지워진 씬 항목은 정리한다.</summary>
+        static void SetBuildScenes(string path)
         {
             var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-            if (scenes.Exists(s => s.path == path)) return;
+            scenes.RemoveAll(s => s.path == path || AssetDatabase.LoadAssetAtPath<SceneAsset>(s.path) == null);
             scenes.Insert(0, new EditorBuildSettingsScene(path, true));
             EditorBuildSettings.scenes = scenes.ToArray();
         }

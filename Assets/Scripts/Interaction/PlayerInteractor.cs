@@ -17,9 +17,9 @@ namespace KindNeighbors.Interaction
 
         void Update()
         {
-            Current = FindTarget();
+            Current = player.InputEnabled ? FindTarget() : null;
 
-            if (Current != null && player.InputEnabled && Input.GetKeyDown(interactKey))
+            if (Current != null && Input.GetKeyDown(interactKey))
                 Current.Interact(this);
         }
 

@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30d07a71299c29046af4951d44642a04, type: 3}
+  m_Name: Dlg_Baker
+  m_EditorClassIdentifier: Assembly-CSharp::KindNeighbors.Dialogue.DialogueGraph
+  speakerName: "\uBE75\uC9D1 \uC8FC\uC778"
+  entries:
+  - conditions:
+    - key: delivered.Order_D1_Bread
+      comparison: 0
+      value: 1
+    startNodeId: after
+  - conditions:
+    - key: accepted.Order_D1_Bread
+      comparison: 0
+      value: 1
+    startNodeId: remind
+  - conditions: []
+    startNodeId: greet
+  nodes:
+  - id: greet
+    speaker: 
+    text: "\uC5B4\uBA38, \uC0C8\uB85C \uC628 \uBC30\uB2EC\uC6D0\uC774\uAD6C\uB098!
+      \uB9C8\uCE68 \uC798 \uC654\uC5B4~"
+    nextId: ask
+    choices: []
+    effects: []
+    actions: []
+  - id: ask
+    speaker: 
+    text: "\uC774 \uBE75 \uBC14\uAD6C\uB2C8, \uC774\uC6C3 \uD560\uBA38\uB2C8\uB124
+      \uC6B0\uD3B8\uD568\uC5D0 \uC880 \uB123\uC5B4 \uC904\uB798?"
+    nextId: 
+    choices:
+    - text: "\uB124, \uB2E4\uB140\uC62C\uAC8C\uC694"
+      nextId: accept
+      conditions: []
+    - text: "\uC9C0\uAE08\uC740 \uC880\u2026"
+      nextId: later
+      conditions: []
+    effects: []
+    actions: []
+  - id: accept
+    speaker: 
+    text: "\uACE0\uB9C8\uC6CC~ \uD560\uBA38\uB2C8 \uB301\uC740 \uAD11\uC7A5\uC5D0\uC11C
+      \uC624\uB978\uCABD \uAE38 \uB05D\uC774\uC57C."
+    nextId: rule1
+    choices: []
+    effects: []
+    actions:
+    - {fileID: 11400000, guid: c16771d964737434f8833a1397fc4235, type: 2}
+  - id: rule1
+    speaker: 
+    text: "\uC544, \uADF8\uB9AC\uACE0\u2026 \uD574 \uC9C0\uAE30 \uC804\uC5D4 \uAF2D
+      \uC9D1\uC5D0 \uB4E4\uC5B4\uAC00\uB834~"
+    nextId: 
+    choices: []
+    effects:
+    - key: heard.rule1
+      operation: 0
+      value: 1
+    actions: []
+  - id: later
+    speaker: 
+    text: "\uADF8\uB798\uADF8\uB798, \uCC9C\uCC9C\uD788 \uD574~ \uBE75\uC740 \uC2DD\uC5B4\uB3C4
+      \uB9DB\uC788\uC73C\uB2C8\uAE4C!"
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: remind
+    speaker: 
+    text: "\uD560\uBA38\uB2C8\uB124 \uC6B0\uD3B8\uD568\uC5D0 \uB123\uC5B4 \uC8FC\uBA74
+      \uB3FC~ \uAD11\uC7A5\uC5D0\uC11C \uC624\uB978\uCABD \uAE38 \uB05D\uC774\uC57C."
+    nextId: 
+    choices: []
+    effects: []
+    actions: []
+  - id: after
+    speaker: 
+    text: "\uD560\uBA38\uB2C8\uAC00 \uC88B\uC544\uD558\uC168\uC9C0? \uC218\uACE0\uD588\uC5B4~"
+    nextId: rule1
+    choices: []
+    effects: []
+    actions: []
